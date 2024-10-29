@@ -85,6 +85,18 @@
         "xtr1common": "cpp",
         "*.tcc": "cpp",
         "memory_resource": "cpp",
-        "cinttypes": "cpp"
+        "cinttypes": "cpp",
+        "bitset": "cpp",
+        "chrono": "cpp",
+        "iomanip": "cpp",
+        "sstream": "cpp",
+        "__nullptr": "cpp",
+        "complex": "cpp",
+        "__hash_table": "cpp",
+        "__split_buffer": "cpp",
+        "__tree": "cpp",
+        "pipeline": "cpp",
+        "barrier": "cpp",
+        "__locale": "cpp"
     }
 }

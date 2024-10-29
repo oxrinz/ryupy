@@ -1,12 +1,10 @@
-import sys, os
+import ryupy
 
-sys.path.append(os.path.abspath("src/py"))
+cpu_tensor1 = ryupy.cuda.tensor(15)
+cpu_tensor1.print_info()
 
-import ryupy as rpy
+cpu_tensor2 = ryupy.cuda.tensor(10)
+cpu_tensor2.print_info()
 
-t1 = rpy.Tensor([3, 0.5, 6])
-t2 = rpy.Tensor([1, 7, 2])
-
-t1 *= t2
-
-print(t1)
+cpu_tensor3 = cpu_tensor1 + cpu_tensor2 + cpu_tensor1 + cpu_tensor2 
+cpu_tensor3.print_info()
