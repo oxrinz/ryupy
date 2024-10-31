@@ -1,35 +1,41 @@
 #include "CudaTensor.h"
+#include <cuda_runtime.h>
+#include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
 
-namespace ryupy {
-    namespace cuda {
+namespace ryupy
+{
+    namespace cuda
+    {
+        CudaTensor::CudaTensor(const py::object &py_data) : Tensor(py_data)
+        {
+            std::vector<float> hostData = flattenData(py_data);
 
-        CudaTensor::CudaTensor(int size) : ITensor(size) {
-            data = new float[size];
-            for (int i = 0; i < size; ++i) {
-                data[i] = 2.0f;
-            }
+            size = hostData.size() * sizeof(float);
+
+            cudaMalloc(&d_data, hostData.size() * sizeof(float));
+
+            cudaMemcpy(d_data, hostData.data(), size, cudaMemcpyHostToDevice);
         }
 
-        CudaTensor* CudaTensor::operator+(const ITensor &other) const {
-            const CudaTensor *cuda_other = dynamic_cast<const CudaTensor *>(&other);
-            if (!cuda_other) {
-                throw std::invalid_argument("Unexpected tensor type.");
-            }
-
-            CudaTensor *result = new CudaTensor(size);
-            for (int i = 0; i < size; ++i) {
-                result->data[i] = this->data[i] + cuda_other->data[i];
-            }
-            return result;
+        py::object CudaTensor::getFlattenedData() const
+        {
+            std::vector<float> hostData(size / sizeof(float));
+            cudaMemcpy(hostData.data(), d_data, size, cudaMemcpyDeviceToHost);
+            return py::cast(hostData);
         }
 
-        void CudaTensor::printInfo() const {
-            std::cout << "CudaTensor with size: " << size << " and data: ";
-            for (int i = 0; i < size; ++i) {
-                std::cout << data[i] << " ";
-            }
-            std::cout << std::endl;
+        py::object CudaTensor::getData() const
+        {
+            std::vector<float> hostData(size / sizeof(float));
+            cudaMemcpy(hostData.data(), d_data, size, cudaMemcpyDeviceToHost);
+            int index = 0;
+            return reshapeData(hostData, shape, index);
         }
 
-    } // namespace cuda
-} // namespace ryupy
+        CudaTensor::~CudaTensor()
+        {
+            cudaFree(d_data);
+        }
+    }
+}

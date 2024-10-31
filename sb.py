@@ -1,10 +1,9 @@
 import ryupy
 
-cpu_tensor1 = ryupy.cuda.tensor(15)
-cpu_tensor1.print_info()
+tensor = ryupy.cuda.Tensor(
+    [[[625, 2524, 48], [625, 2524, 48]], [[625, 2524, 48], [625, 2524, 48]]]
+)
 
-cpu_tensor2 = ryupy.cuda.tensor(10)
-cpu_tensor2.print_info()
-
-cpu_tensor3 = cpu_tensor1 + cpu_tensor2 + cpu_tensor1 + cpu_tensor2 
-cpu_tensor3.print_info()
+print(tensor.data)
+print(tensor.shape)
+print(tensor.flattenedData)

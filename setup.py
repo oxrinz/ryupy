@@ -45,16 +45,13 @@ print(f"Successfully built {output_file}")
 
 if os.path.exists("ryupy.pyd"):
     try:
-        # Create ryupy directory if it doesn't exist
         os.makedirs("ryupy", exist_ok=True)
 
-        # Generate stubs directly in the ryupy directory
         subprocess.run(
             [sys.executable, "-m", "pybind11_stubgen", "ryupy", "--output-dir", "."],
             check=True,
         )
 
-        # Create py.typed file
         with open("ryupy/py.typed", "w") as f:
             pass
 

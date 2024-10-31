@@ -1,16 +1,26 @@
 #pragma once
 
-#include "../../core/ITensor.h"
-#include <stdexcept>
-#include <iostream>
+#include "../../core/Tensor.h"
+#include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
+#include <vector>
 
-namespace ryupy {
-    namespace cuda {
-        class CudaTensor : public ITensor {
+namespace py = pybind11;
+
+namespace ryupy
+{
+    namespace cuda
+    {
+        class CudaTensor : public Tensor
+        {
         public:
-            CudaTensor(std::vector<int> size);
-            CudaTensor* operator+(const ITensor &other) const;
-            void printInfo() const override;
+            float* d_data;
+            int size;
+
+            explicit CudaTensor(const py::object &data);
+            virtual ~CudaTensor();  
+            py::object getData() const;
+            py::object getFlattenedData() const;
         };
-    } 
-} 
+    }
+}

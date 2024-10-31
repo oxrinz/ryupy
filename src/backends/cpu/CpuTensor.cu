@@ -1,42 +1,25 @@
 #include "CpuTensor.h"
+#include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
 
 namespace ryupy
 {
     namespace cpu
     {
-        CpuTensor::CpuTensor(int size) : ITensor(size)
+        CpuTensor::CpuTensor(const py::object &py_data) : Tensor(py_data)
         {
-            data = new float[size];
-            for (int i = 0; i < size; ++i)
-            {
-                data[i] = 1.0f;
-            }
+            data = flattenData(py_data);
         }
 
-        CpuTensor *CpuTensor::operator+(const ITensor &other) const
+        py::object CpuTensor::getData() const
         {
-            const CpuTensor *cpu_other = dynamic_cast<const CpuTensor *>(&other);
-            if (!cpu_other)
-            {
-                throw std::invalid_argument("Unexpected tensor type.");
-            }
-
-            CpuTensor *result = new CpuTensor(size);
-            for (int i = 0; i < size; ++i)
-            {
-                result->data[i] = this->data[i] + cpu_other->data[i];
-            }
-            return result;
+            int index = 0;
+            return reshapeData(data, shape, index);
         }
 
-        void CpuTensor::printInfo() const
+        py::object CpuTensor::getFlattenedData() const
         {
-            std::cout << "CpuTensor with size: " << size << " and data: ";
-            for (int i = 0; i < size; ++i)
-            {
-                std::cout << data[i] << " ";
-            }
-            std::cout << std::endl;
+            return py::cast(data);
         }
     }
 }

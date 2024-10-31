@@ -1,19 +1,19 @@
 from __future__ import annotations
 import ryupy
-__all__ = ['tensor']
-class tensor(ryupy._ITensor):
+import typing
+__all__ = ['Tensor']
+class Tensor(ryupy._Tensor):
     @staticmethod
     def _pybind11_conduit_v1_(*args, **kwargs):
         ...
-    def __add__(self, arg0: tensor) -> tensor:
-        ...
-    def __init__(self, arg0: int) -> None:
-        ...
-    def print_info(self) -> None:
+    def __init__(self, arg0: typing.Any) -> None:
         ...
     @property
-    def data(self) -> list:
+    def data(self) -> typing.Any:
         ...
     @property
-    def size(self) -> int:
+    def flattenedData(self) -> typing.Any:
+        ...
+    @property
+    def shape(self) -> list[int]:
         ...

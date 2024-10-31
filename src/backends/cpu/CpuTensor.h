@@ -1,20 +1,24 @@
 #pragma once
 
-#include "../../core/ITensor.h"
+#include "../../core/Tensor.h"
+#include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
+#include <vector>
 
+namespace py = pybind11;
 
 namespace ryupy
 {
     namespace cpu
     {
-        class CpuTensor : public ITensor
+        class CpuTensor : public Tensor
         {
         public:
-            CpuTensor(std::vector<int> size);
+            std::vector<float> data;
 
-            CpuTensor* operator+(const ITensor &other) const;
-
-            void printInfo() const override;
+            explicit CpuTensor(const py::object &data);
+            py::object getData() const;
+            py::object getFlattenedData() const;
         };
-    };
+    }
 }
