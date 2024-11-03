@@ -9,3 +9,5 @@ Inspired by the [scaling laws paper](https://arxiv.org/abs/2001.08361), RyuPy is
 - Custom cuda kernels
 - Everything is written from scratch
 - Optimized for specific use cases
+
+# Built on NixOS <3

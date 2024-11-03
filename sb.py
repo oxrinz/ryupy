@@ -1,9 +1,17 @@
+import os
 import ryupy
+import numpy
 
-tensor = ryupy.cuda.Tensor(
-    [[[625, 2524, 48], [625, 2524, 48]], [[625, 2524, 48], [625, 2524, 48]]]
+tensor1 = ryupy.cuda.Tensor(
+    [[[[1, 2], [3, 4]], [[5, 6], [7, 8]]], [[[9, 10], [11, 12]], [[13, 14], [15, 16]]]]
+)
+tensor2 = ryupy.cuda.Tensor(
+    [
+        [[[17, 18], [19, 20]], [[21, 22], [23, 24]]],
+        [[[25, 26], [27, 28]], [[29, 30], [31, 32]]],
+    ]
 )
 
-print(tensor.data)
-print(tensor.shape)
-print(tensor.flattenedData)
+tensor1 += tensor2
+
+print(tensor1.data)

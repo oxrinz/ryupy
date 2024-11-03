@@ -13,7 +13,7 @@ namespace ryupy
 
             size = hostData.size() * sizeof(float);
 
-            cudaMalloc(&d_data, hostData.size() * sizeof(float));
+            cudaMalloc(&d_data, size);
 
             cudaMemcpy(d_data, hostData.data(), size, cudaMemcpyHostToDevice);
         }
