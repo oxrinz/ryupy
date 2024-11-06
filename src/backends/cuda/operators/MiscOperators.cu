@@ -23,15 +23,22 @@ namespace ryupy
 
         std::shared_ptr<CudaTensor> CudaTensor::matmul(const CudaTensor &other) const
         {
+            // Ensure both tensors have at least 2 dimensions
             if (shape.size() < 2 || other.shape.size() < 2)
             {
                 throw std::invalid_argument("Both tensors must have at least 2 dimensions for matrix multiplication.");
             }
 
+            // Calculate batch size and verify batch dimensions
             int batchSize = 1;
-            int minBatchDim = std::min(shape.size(), other.shape.size()) - 2;
+            int batchDim = shape.size() - 2; // Number of batch dimensions
 
-            for (int i = 0; i < minBatchDim; ++i)
+            if (shape.size() != other.shape.size())
+            {
+                throw std::invalid_argument("Input tensors must have the same number of dimensions.");
+            }
+
+            for (int i = 0; i < batchDim; ++i)
             {
                 if (shape[i] != other.shape[i])
                 {
@@ -40,26 +47,36 @@ namespace ryupy
                 batchSize *= shape[i];
             }
 
-            int m = shape[shape.size() - 2];
-            int n = shape[shape.size() - 1];
-            int n_other = other.shape[other.shape.size() - 2];
-            int p = other.shape[other.shape.size() - 1];
+            // Dimensions for matrix multiplication
+            int m = shape[shape.size() - 2];                   // Rows in A
+            int k = shape[shape.size() - 1];                   // Columns in A
+            int k_other = other.shape[other.shape.size() - 2]; // Rows in B
+            int n = other.shape[other.shape.size() - 1];       // Columns in B
 
-            if (n != n_other)
+            if (k != k_other)
             {
                 throw std::invalid_argument("Inner dimensions must match for matrix multiplication.");
             }
 
-            auto result = std::make_shared<CudaTensor>(*this);
+            // Build result shape
+            std::vector<int> result_shape(shape.begin(), shape.begin() + batchDim);
+            result_shape.push_back(m);
+            result_shape.push_back(n);
 
-            cudaMalloc(&result->d_data, batchSize * m * p * sizeof(float));
+            // Allocate memory for result
+            size_t total_elements = batchSize * m * n;
 
-            int lda = n;
-            int ldb = p;
-            int ldc = p;
-            int strideA = m * n;
-            int strideB = n * p;
-            int strideC = m * p;
+            // Prepare the result tensor
+            std::shared_ptr<CudaTensor>  result = std::make_shared<CudaTensor>(total_elements * sizeof(float), result_shape);
+
+            // cuBLAS parameters
+            int lda = k; // Leading dimension of A
+            int ldb = k; // Leading dimension of B
+            int ldc = n; // Leading dimension of C
+
+            long long int strideA = static_cast<long long int>(m) * k;
+            long long int strideB = static_cast<long long int>(k) * n;
+            long long int strideC = static_cast<long long int>(m) * n;
 
             cublasHandle_t handle;
             cublasCreate(&handle);
@@ -67,16 +84,25 @@ namespace ryupy
             const float alpha = 1.0f;
             const float beta = 0.0f;
 
-            cublasSgemmStridedBatched(handle,
-                                      CUBLAS_OP_N, CUBLAS_OP_N,
-                                      m, p, n,
-                                      &alpha,
-                                      d_data, lda, strideA,
-                                      other.d_data, ldb, strideB,
-                                      &beta,
-                                      result->d_data, ldc, strideC,
-                                      batchSize);
+            // Perform the matrix multiplication
+            cublasStatus_t status = cublasSgemmStridedBatched(
+                handle,
+                CUBLAS_OP_N, CUBLAS_OP_N,
+                n, m, k,
+                &alpha,
+                d_data, lda, strideA,
+                other.d_data, ldb, strideB,
+                &beta,
+                result->d_data, ldc, strideC,
+                batchSize);
 
+            if (status != CUBLAS_STATUS_SUCCESS)
+            {
+                cublasDestroy(handle);
+                throw std::runtime_error("cublasSgemmStridedBatched failed");
+            }
+
+            // Clean up
             cublasDestroy(handle);
 
             return result;

@@ -1,17 +1,25 @@
-import os
-import ryupy
-import numpy
+import ryupy as rp
+import numpy as np
 
-tensor1 = ryupy.cuda.Tensor(
-    [[[[1, 2], [3, 4]], [[5, 6], [7, 8]]], [[[9, 10], [11, 12]], [[13, 14], [15, 16]]]]
+rp.cu
+
+rptensor1 = rp.cuda.Tensor(
+    [[[[2, 3], [4, 5]], [[2, 3], [4, 5]]], [[[2, 3], [4, 5]], [[2, 3], [4, 5]]]]
 )
-tensor2 = ryupy.cuda.Tensor(
-    [
-        [[[17, 18], [19, 20]], [[21, 22], [23, 24]]],
-        [[[25, 26], [27, 28]], [[29, 30], [31, 32]]],
-    ]
+rptensor2 = rp.cuda.Tensor(
+    [[[[2, 3], [4, 5]], [[2, 3], [4, 5]]], [[[2, 3], [4, 5]], [[2, 3], [4, 5]]]]
 )
 
-tensor1 += tensor2
+nptensor1 = np.array(
+    [[[[2, 3], [4, 5]], [[2, 3], [4, 5]]], [[[2, 3], [4, 5]], [[2, 3], [4, 5]]]]
+)
+nptensor2 = np.array(
+    [[[[2, 3], [4, 5]], [[2, 3], [4, 5]]], [[[2, 3], [4, 5]], [[2, 3], [4, 5]]]]
+)
 
-print(tensor1.data)
+rptensor = rptensor1 @ rptensor2
+nptensor = nptensor1 @ nptensor2
+
+print(rptensor.shape)
+print(rptensor.data)
+print(nptensor)

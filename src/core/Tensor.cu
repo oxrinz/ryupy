@@ -50,51 +50,160 @@ namespace ryupy
         return shape;
     }
 
-    std::vector<float> Tensor::flattenData(const py::object &obj)
+    std::vector<float> Tensor::flattenPythonData(const py::object &obj)
     {
-        std::vector<float> flattened;
-
-        if (py::isinstance<py::list>(obj) || py::isinstance<py::tuple>(obj))
+        // Determine the shape of the nested Python object
+        std::vector<int> shape;
         {
-            for (auto item : obj)
+            py::object current = obj;
+            while (py::isinstance<py::list>(current) || py::isinstance<py::tuple>(current))
             {
-                auto nested_flattened = flattenData(py::reinterpret_borrow<py::object>(item));       // Recursive call
-                flattened.insert(flattened.end(), nested_flattened.begin(), nested_flattened.end()); // Append to result
+                py::sequence seq = current.cast<py::sequence>();
+                shape.push_back(seq.size());
+                if (seq.size() == 0)
+                    break;
+                current = seq[0];
             }
         }
-        else if (py::isinstance<py::float_>(obj) || py::isinstance<py::int_>(obj))
+
+        int n_dims = shape.size();
+        if (n_dims < 2)
         {
-            flattened.push_back(obj.cast<float>());
+            throw std::invalid_argument("Tensor must have at least 2 dimensions for matrix operations.");
         }
-        else
+
+        int batch_dims = n_dims - 2; // Number of batch dimensions
+
+        // Initialize the flattened vector
+        std::vector<float> flattened;
+
+        // Recursive function to traverse batch dimensions in row-major order
+        std::function<void(int, const py::object &)> traverseBatch;
+        traverseBatch = [&](int dim, const py::object &current)
         {
-            throw std::invalid_argument("Unsupported data type encountered in the input object");
-        }
+            if (dim == batch_dims)
+            {
+                // At the matrix level, flatten in column-major order
+                py::object matrix = current;
+                py::sequence rows = matrix.cast<py::sequence>();
+                int m = rows.size();
+                if (m != shape[batch_dims])
+                {
+                    throw std::invalid_argument("Mismatch in matrix row size.");
+                }
+                if (m == 0)
+                    return;
+                py::sequence cols = rows[0].cast<py::sequence>();
+                int n = cols.size();
+                if (n != shape[batch_dims + 1])
+                {
+                    throw std::invalid_argument("Mismatch in matrix column size.");
+                }
+
+                // Flatten the matrix in column-major order
+                for (int col = 0; col < n; ++col)
+                {
+                    for (int row = 0; row < m; ++row)
+                    {
+                        py::object element = rows[row].cast<py::sequence>()[col];
+                        if (py::isinstance<py::float_>(element) || py::isinstance<py::int_>(element))
+                        {
+                            flattened.push_back(element.cast<float>());
+                        }
+                        else
+                        {
+                            throw std::invalid_argument("Non-numeric element encountered in the input object");
+                        }
+                    }
+                }
+            }
+            else
+            {
+                // Traverse batch dimensions in row-major order
+                py::sequence seq = current.cast<py::sequence>();
+                for (int i = 0; i < seq.size(); ++i)
+                {
+                    traverseBatch(dim + 1, seq[i]);
+                }
+            }
+        };
+
+        // Start the traversal from the first batch dimension
+        traverseBatch(0, obj);
 
         return flattened;
     }
 
-    py::object Tensor::reshapeData(const std::vector<float> &data, const std::vector<int> &shape, int &index) const
+    py::object Tensor::reshapeData(const std::vector<float> &data, const std::vector<int> &shape) const
     {
-        int current_dim = shape[0];
-
-        if (shape.size() == 1)
+        // Compute total size
+        int total_size = 1;
+        for (int dim : shape)
         {
-            py::list result;
-            for (int i = 0; i < current_dim; ++i)
+            total_size *= dim;
+        }
+        if (data.size() != total_size)
+        {
+            throw std::invalid_argument("Data size does not match shape.");
+        }
+
+        int n_dims = shape.size();
+        if (n_dims < 2)
+        {
+            throw std::invalid_argument("Tensor must have at least 2 dimensions for matrix operations.");
+        }
+
+        int batch_dims = n_dims - 2; // Number of batch dimensions
+
+        // Compute strides for batch dimensions (row-major order)
+        std::vector<int> batch_strides(batch_dims, 1);
+        for (int i = batch_dims - 2; i >= 0; --i)
+        {
+            batch_strides[i] = batch_strides[i + 1] * shape[i + 1];
+        }
+
+        // Dimensions of matrices
+        int m = shape[n_dims - 2];
+        int n = shape[n_dims - 1];
+
+        // Compute stride for matrix (number of elements per matrix)
+        int matrix_size = m * n;
+
+        // Recursive function to build the nested structure
+        std::function<py::object(int, int)> buildStructure;
+        buildStructure = [&](int dim, int index) -> py::object
+        {
+            if (dim == batch_dims)
             {
-                result.append(data[index++]);
+                // Reconstruct matrix from flat data in column-major order
+                py::list matrix;
+                for (int row = 0; row < m; ++row)
+                {
+                    py::list row_list;
+                    for (int col = 0; col < n; ++col)
+                    {
+                        int linear_index = index + col * m + row;
+                        float value = data[linear_index];
+                        row_list.append(value);
+                    }
+                    matrix.append(row_list);
+                }
+                return matrix;
             }
-            return result;
-        }
+            else
+            {
+                py::list batch_list;
+                int stride = batch_strides[dim] * matrix_size;
+                for (int i = 0; i < shape[dim]; ++i)
+                {
+                    batch_list.append(buildStructure(dim + 1, index + i * stride));
+                }
+                return batch_list;
+            }
+        };
 
-        py::list result;
-        std::vector<int> sub_shape(shape.begin() + 1, shape.end());
-        for (int i = 0; i < current_dim; ++i)
-        {
-            result.append(reshapeData(data, sub_shape, index));
-        }
-
-        return result;
+        // Start building the structure from the first batch dimension
+        return buildStructure(0, 0);
     }
+
 }

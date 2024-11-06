@@ -21,15 +21,39 @@ pybind_includes = (
 )
 
 # Python include and library paths
-python_include = subprocess.check_output(
-    [python_executable, "-c", "import sysconfig; print(sysconfig.get_path('include'))"]
-).decode().strip()
-python_lib_dir = subprocess.check_output(
-    [python_executable, "-c", "import sysconfig; print(sysconfig.get_config_var('LIBDIR'))"]
-).decode().strip()
-python_lib = subprocess.check_output(
-    [python_executable, "-c", "import sysconfig; print(sysconfig.get_config_var('LDLIBRARY'))"]
-).decode().strip()
+python_include = (
+    subprocess.check_output(
+        [
+            python_executable,
+            "-c",
+            "import sysconfig; print(sysconfig.get_path('include'))",
+        ]
+    )
+    .decode()
+    .strip()
+)
+python_lib_dir = (
+    subprocess.check_output(
+        [
+            python_executable,
+            "-c",
+            "import sysconfig; print(sysconfig.get_config_var('LIBDIR'))",
+        ]
+    )
+    .decode()
+    .strip()
+)
+python_lib = (
+    subprocess.check_output(
+        [
+            python_executable,
+            "-c",
+            "import sysconfig; print(sysconfig.get_config_var('LDLIBRARY'))",
+        ]
+    )
+    .decode()
+    .strip()
+)
 
 # Collect .cu and .cpp source files
 source_files = []
@@ -39,19 +63,22 @@ for root, dirs, files in os.walk(src_dir):
             source_files.append(os.path.join(root, file))
 
 # Path to the directory containing libcudadevrt.a and libcudart_static.a
-cuda_static_lib_dir = "/nix/store/yp5wra915j9p5nxa631svxv0x1r5z3m3-cuda_cudart-11.8.89-static/lib"
+cuda_static_lib_dir = (
+    "/nix/store/yp5wra915j9p5nxa631svxv0x1r5z3m3-cuda_cudart-11.8.89-static/lib"
+)
 
 command = (
     [
         "nvcc",
         "--verbose",
         "-shared",
-        "-arch=sm_75",           # Specify the architecture
-        "-DCUBLAS_ENABLED",       # Define CUBLAS if needed
-        "-lcublas",               # Link cuBLAS if needed
-        "-lcudadevrt",            # Link the device runtime library
-        "-lcudart_static",        # Link the static CUDA runtime library
-        "-L{}".format(cuda_static_lib_dir),  # Add the path to the static CUDA libraries
+        "-arch=sm_75",
+        "-DCUBLAS_ENABLED",
+        "-lcublas",
+        # "-lcudnn",
+        "-lcudadevrt",
+        "-lcudart_static",
+        "-L{}".format(cuda_static_lib_dir),
         "-o",
         output_file,
         "-std=c++14",
@@ -82,13 +109,13 @@ if os.path.exists(output_file):
             [sys.executable, "-m", "pybind11_stubgen", "ryupy", "--output-dir", "."],
             check=True,
         )
-        
+
         if os.path.exists("ryupy"):
             shutil.rmtree("ryupy")  # Delete the existing ryupy directory
 
         # Rename the ryupy-stubs directory to ryupy
         os.rename("ryupy-stubs", "ryupy")
-        
+
         with open("ryupy/py.typed", "w") as f:
             pass
         print("Successfully generated stubs")

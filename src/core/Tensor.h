@@ -14,6 +14,7 @@ namespace ryupy
     class Tensor
     {
     public:
+        explicit Tensor() : shape() {}
         explicit Tensor(const py::object &data);
         virtual ~Tensor() = default;
 
@@ -27,11 +28,10 @@ namespace ryupy
         virtual py::object getData() const = 0;
         virtual py::object getFlattenedData() const = 0;
 
-
     protected:
         std::vector<int>
         inferShape(const py::object &obj);
-        std::vector<float> flattenData(const py::object &obj);
-        py::object reshapeData(const std::vector<float> &data, const std::vector<int> &shape, int &index) const;
+        std::vector<float> flattenPythonData(const py::object &obj);
+        py::object reshapeData(const std::vector<float> &data, const std::vector<int> &shape) const;
     };
 }

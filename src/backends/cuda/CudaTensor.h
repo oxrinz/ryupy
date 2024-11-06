@@ -5,6 +5,7 @@
 #include <pybind11/stl.h>
 #include <vector>
 #include <memory>
+#include <cudnn.h>
 
 namespace py = pybind11;
 
@@ -17,9 +18,12 @@ namespace ryupy
         public:
             float *d_data;
             int size;
+            cudnnTensorDescriptor_t tensor_desc;
 
             explicit CudaTensor(const py::object &data);
+            explicit CudaTensor(int size, std::vector<int> shape);
             virtual ~CudaTensor();
+
             py::object getData() const;
             py::object getFlattenedData() const;
 

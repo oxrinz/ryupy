@@ -11,12 +11,12 @@ PYBIND11_MODULE(ryupy, m)
 {
     py::class_<ryupy::Tensor, std::shared_ptr<ryupy::Tensor>>(m, "_Tensor");
 
-    auto cpu = m.def_submodule("cpu");
-    py::class_<ryupy::cpu::CpuTensor, ryupy::Tensor, std::shared_ptr<ryupy::cpu::CpuTensor>>(cpu, "Tensor")
-        .def(py::init<py::object>())
-        .def_property_readonly("shape", &ryupy::Tensor::getShape)
-        .def_property_readonly("flattenedData", &ryupy::Tensor::getFlattenedData)
-        .def_property_readonly("data", &ryupy::Tensor::getData);
+    // auto cpu = m.def_submodule("cpu");
+    // py::class_<ryupy::cpu::CpuTensor, ryupy::Tensor, std::shared_ptr<ryupy::cpu::CpuTensor>>(cpu, "Tensor")
+    //     .def(py::init<py::object>())
+    //     .def_property_readonly("shape", &ryupy::Tensor::getShape)
+    //     .def_property_readonly("flattenedData", &ryupy::Tensor::getFlattenedData)
+    //     .def_property_readonly("data", &ryupy::Tensor::getData);
 
     auto cuda = m.def_submodule("cuda");
     py::class_<ryupy::cuda::CudaTensor, ryupy::Tensor, std::shared_ptr<ryupy::cuda::CudaTensor>>(cuda, "Tensor")

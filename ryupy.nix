@@ -20,6 +20,7 @@ pkgs.mkShell {
       propagatedBuildInputs = [ pkgs.python310Packages.pybind11 ];
     })
     pkgs.cudaPackages_11_8.cudatoolkit        
+    pkgs.cudaPackages_11_8.cudnn        
     pkgs.linuxPackages.nvidia_x11            
     pkgs.libGLU pkgs.libGL
     pkgs.xorg.libXi pkgs.xorg.libXmu pkgs.freeglut
@@ -28,9 +29,16 @@ pkgs.mkShell {
   ];
 
   shellHook = ''
+    export NIXPKGS_ALLOW_UNFREE=1
     export CUDA_PATH=${pkgs.cudaPackages_11_8.cudatoolkit}/bin
-    export EXTRA_LDFLAGS="-L/lib -L${pkgs.linuxPackages.nvidia_x11}/lib"
-    export EXTRA_CCFLAGS="-I/usr/include"
+    
+    # Add cuDNN include and library paths
+    export CUDNN_INCLUDE_DIR=${pkgs.cudaPackages_11_8.cudnn}/include
+    export CUDNN_LIB_DIR=${pkgs.cudaPackages_11_8.cudnn}/lib
+    
+    # Update compiler flags to include cuDNN paths
+    export EXTRA_CCFLAGS="-I$CUDNN_INCLUDE_DIR -I${pkgs.cudaPackages_11_8.cudatoolkit}/include"
+    export EXTRA_LDFLAGS="-L$CUDNN_LIB_DIR -L${pkgs.cudaPackages_11_8.cudatoolkit}/lib -L${pkgs.linuxPackages.nvidia_x11}/lib"
     
     # Override the compilers for nvcc to use GCC 10
     export CC=${pkgs.gcc10}/bin/gcc    # Explicitly set GCC 10 as the compiler
