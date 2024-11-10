@@ -71,7 +71,7 @@ command = (
     [
         "nvcc",
         "--verbose",
-        "-shared",
+        "-shared", 
         "-arch=sm_75",
         "-DCUBLAS_ENABLED",
         "-lcublas",
