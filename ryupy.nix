@@ -1,12 +1,13 @@
 { pkgs ? import <nixpkgs> {} }:
 
 pkgs.mkShell {
-  name = "cuda-env-shell";
+  name = "ryupy-shell";
   buildInputs = with pkgs; [
     pkgs.gcc10                         
     pkgs.python310
     pkgs.python310Packages.pybind11
     pkgs.python310Packages.tqdm
+    pkgs.python310Packages.mypy
     pkgs.python310Packages.numpy
     (pkgs.python310Packages.buildPythonPackage rec {
       pname = "pybind11-stubgen";

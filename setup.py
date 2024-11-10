@@ -75,7 +75,7 @@ command = (
         "-arch=sm_75",
         "-DCUBLAS_ENABLED",
         "-lcublas",
-        # "-lcudnn",
+        "-lcudnn",
         "-lcudadevrt",
         "-lcudart_static",
         "-L{}".format(cuda_static_lib_dir),

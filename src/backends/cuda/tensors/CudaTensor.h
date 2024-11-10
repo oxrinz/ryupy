@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../core/Tensor.h"
+#include "../../../core/Tensor.h"
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 #include <vector>
@@ -20,6 +20,7 @@ namespace ryupy
             int size;
             cudnnTensorDescriptor_t tensor_desc;
 
+            CudaTensor() = default;
             explicit CudaTensor(const py::object &data);
             explicit CudaTensor(int size, std::vector<int> shape);
             virtual ~CudaTensor();
@@ -101,8 +102,6 @@ namespace ryupy
             // std::shared_ptr<CudaTensor> floor() const;
             // std::shared_ptr<CudaTensor> ceil() const;
             // std::shared_ptr<CudaTensor> round() const;
-
-            std::shared_ptr<CudaTensor> handleOperator(const CudaTensor &other, int type) const;
         };
     }
 }

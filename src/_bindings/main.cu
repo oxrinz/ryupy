@@ -2,8 +2,8 @@
 #include <pybind11/operators.h>
 #include <pybind11/stl.h>
 #include "../core/Tensor.h"
-#include "../backends/cpu/CpuTensor.h"
-#include "../backends/cuda/CudaTensor.h"
+#include "../backends/cuda/tensors/CudaTensor.h"
+#include "../backends/cuda/layers/LinearLayer.h"
 
 namespace py = pybind11;
 
@@ -59,6 +59,22 @@ PYBIND11_MODULE(ryupy, m)
         .def("__ixor__", &ryupy::cuda::CudaTensor::operator^=)
         .def("__ilshift__", &ryupy::cuda::CudaTensor::operator<<=)
         .def("__irshift__", &ryupy::cuda::CudaTensor::operator>>=)
-        
+
         .def("__matmul__", &ryupy::cuda::CudaTensor::matmul);
+
+    auto cudann = cuda.def_submodule("nn");
+
+    using InitType = ryupy::cuda::nn::LinearLayer::InitType;
+    py::enum_<InitType>(cudann, "InitType")
+        .value("XAVIER_UNIFORM", InitType::XAVIER_UNIFORM)
+        .value("XAVIER_NORMAL", InitType::XAVIER_NORMAL)
+        .value("KAIMING_UNIFORM", InitType::KAIMING_UNIFORM)
+        .value("KAIMING_NORMAL", InitType::KAIMING_NORMAL)
+        .export_values();
+
+    py::class_<ryupy::cuda::nn::LinearLayer>(cudann, "Linear")
+        .def(py::init<int, int, InitType>())
+        .def("forward", &ryupy::cuda::nn::LinearLayer::forward)
+        .def_readwrite("weight", &ryupy::cuda::nn::LinearLayer::weight)
+        .def_readwrite("bias", &ryupy::cuda::nn::LinearLayer::bias);
 }

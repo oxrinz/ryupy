@@ -40,11 +40,10 @@ $(TARGET): $(OBJS)
 # Generate Python stubs
 generate_stubs:
 	@echo "Generating stubs..."
+	@mkdir -p ryupy
 	@$(PYTHON) -m pybind11_stubgen ryupy --output-dir .
-	@rm -rf ryupy  # Remove any existing ryupy directory
-	@mkdir -p ryupy  # Create the ryupy directory
-	@mv ryupy-stubs/* ryupy/  # Move contents of ryupy-stubs into ryupy
-	@rm -rf ryupy-stubs  # Remove the empty ryupy-stubs directory
+	@mv ryupy-stubs/* ryupy/
+	@rm -rf ryupy-stubs
 	@touch ryupy/py.typed
 	@echo "Successfully generated stubs"
 
@@ -53,3 +52,5 @@ clean:
 	rm -f $(OBJS) $(TARGET)
 	rm -rf ryupy
 	@echo "Cleaned up build files"
+
+.PHONY: clean generate_stubs
