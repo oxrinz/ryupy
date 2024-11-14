@@ -37,20 +37,3 @@ $(TARGET): $(OBJS)
 %.o: %.cpp
 	$(NVCC) $(CXXFLAGS) -I$(PYTHON_INCLUDE) -c $< -o $@
 
-# Generate Python stubs
-generate_stubs:
-	@echo "Generating stubs..."
-	@mkdir -p ryupy
-	@$(PYTHON) -m pybind11_stubgen ryupy --output-dir .
-	@mv ryupy-stubs/* ryupy/
-	@rm -rf ryupy-stubs
-	@touch ryupy/py.typed
-	@echo "Successfully generated stubs"
-
-# Clean up build artifacts
-clean:
-	rm -f $(OBJS) $(TARGET)
-	rm -rf ryupy
-	@echo "Cleaned up build files"
-
-.PHONY: clean generate_stubs
