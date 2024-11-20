@@ -103,6 +103,8 @@
         "__tuple": "cpp",
         "__config": "cpp",
         "__functional_03": "cpp",
-        "__node_handle": "cpp"
+        "__node_handle": "cpp",
+        "__bit_reference": "cpp",
+        "__memory": "cpp"
     }
 }
