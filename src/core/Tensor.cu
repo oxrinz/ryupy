@@ -52,7 +52,6 @@ namespace ryupy
 
     std::vector<float> Tensor::flattenPythonData(const py::object &obj)
     {
-        // Determine the shape of the nested Python object
         std::vector<int> shape;
         {
             py::object current = obj;
@@ -72,18 +71,15 @@ namespace ryupy
             throw std::invalid_argument("Tensor must have at least 2 dimensions for matrix operations.");
         }
 
-        int batch_dims = n_dims - 2; // Number of batch dimensions
+        int batch_dims = n_dims - 2;
 
-        // Initialize the flattened vector
         std::vector<float> flattened;
 
-        // Recursive function to traverse batch dimensions in row-major order
         std::function<void(int, const py::object &)> traverseBatch;
         traverseBatch = [&](int dim, const py::object &current)
         {
             if (dim == batch_dims)
             {
-                // At the matrix level, flatten in column-major order
                 py::object matrix = current;
                 py::sequence rows = matrix.cast<py::sequence>();
                 int m = rows.size();
@@ -100,7 +96,6 @@ namespace ryupy
                     throw std::invalid_argument("Mismatch in matrix column size.");
                 }
 
-                // Flatten the matrix in column-major order
                 for (int col = 0; col < n; ++col)
                 {
                     for (int row = 0; row < m; ++row)
@@ -119,7 +114,6 @@ namespace ryupy
             }
             else
             {
-                // Traverse batch dimensions in row-major order
                 py::sequence seq = current.cast<py::sequence>();
                 for (int i = 0; i < seq.size(); ++i)
                 {
@@ -128,7 +122,6 @@ namespace ryupy
             }
         };
 
-        // Start the traversal from the first batch dimension
         traverseBatch(0, obj);
 
         return flattened;
@@ -136,7 +129,6 @@ namespace ryupy
 
     py::object Tensor::reshapeData(const std::vector<float> &data, const std::vector<int> &shape) const
     {
-        // Compute total size
         int total_size = 1;
         for (int dim : shape)
         {
@@ -150,32 +142,32 @@ namespace ryupy
         int n_dims = shape.size();
         if (n_dims < 2)
         {
-            throw std::invalid_argument("Tensor must have at least 2 dimensions for matrix operations.");
+            py::list raw_list;
+            for (float value : data)
+            {
+                raw_list.append(value);
+            }
+            return raw_list;
         }
 
-        int batch_dims = n_dims - 2; // Number of batch dimensions
+        int batch_dims = n_dims - 2; 
 
-        // Compute strides for batch dimensions (row-major order)
         std::vector<int> batch_strides(batch_dims, 1);
         for (int i = batch_dims - 2; i >= 0; --i)
         {
             batch_strides[i] = batch_strides[i + 1] * shape[i + 1];
         }
 
-        // Dimensions of matrices
         int m = shape[n_dims - 2];
         int n = shape[n_dims - 1];
 
-        // Compute stride for matrix (number of elements per matrix)
         int matrix_size = m * n;
 
-        // Recursive function to build the nested structure
         std::function<py::object(int, int)> buildStructure;
         buildStructure = [&](int dim, int index) -> py::object
         {
             if (dim == batch_dims)
             {
-                // Reconstruct matrix from flat data in column-major order
                 py::list matrix;
                 for (int row = 0; row < m; ++row)
                 {
@@ -202,7 +194,6 @@ namespace ryupy
             }
         };
 
-        // Start building the structure from the first batch dimension
         return buildStructure(0, 0);
     }
 

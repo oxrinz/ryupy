@@ -11,14 +11,22 @@ PYBIND11_MODULE(ryupy, m)
 {
     py::class_<ryupy::Tensor, std::shared_ptr<ryupy::Tensor>>(m, "_Tensor");
 
-    // auto cpu = m.def_submodule("cpu");
-    // py::class_<ryupy::cpu::CpuTensor, ryupy::Tensor, std::shared_ptr<ryupy::cpu::CpuTensor>>(cpu, "Tensor")
-    //     .def(py::init<py::object>())
-    //     .def_property_readonly("shape", &ryupy::Tensor::getShape)
-    //     .def_property_readonly("flattenedData", &ryupy::Tensor::getFlattenedData)
-    //     .def_property_readonly("data", &ryupy::Tensor::getData);
+    auto cuda = m.def_submodule("cuda")
+                    .def("zeros", &ryupy::cuda::CudaTensor::zeros)
+                    .def("ones", &ryupy::cuda::CudaTensor::ones)
+                    .def("fill", &ryupy::cuda::CudaTensor::fill)
+                    .def("arange", &ryupy::cuda::CudaTensor::arange)
+                    .def("linspace", &ryupy::cuda::CudaTensor::linspace)
+                    .def("eye", &ryupy::cuda::CudaTensor::eye)
+                    .def("rand", &ryupy::cuda::CudaTensor::random_uniform,
+                         py::arg("shape"),
+                         py::arg("low") = 0.0f,
+                         py::arg("high") = 1.0f)
+                    .def("randn", &ryupy::cuda::CudaTensor::random_normal,
+                         py::arg("shape"),
+                         py::arg("mean") = 0.0f,
+                         py::arg("std") = 1.0f);
 
-    auto cuda = m.def_submodule("cuda");
     py::class_<ryupy::cuda::CudaTensor, ryupy::Tensor, std::shared_ptr<ryupy::cuda::CudaTensor>>(cuda, "Tensor")
         .def(py::init<py::object>())
         .def_property_readonly("shape", &ryupy::Tensor::getShape)

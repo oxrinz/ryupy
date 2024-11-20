@@ -23,11 +23,10 @@ PYBIND_INCLUDES := $(shell $(PYTHON) -m pybind11 --includes)
 
 # Build the shared library
 $(TARGET): $(OBJS)
-	$(NVCC) -shared -arch=sm_75 -DCUBLAS_ENABLED -lcublas -lcudnn -lcudadevrt -lcudart_static \
+	$(NVCC) -shared -arch=sm_75 -DCUBLAS_ENABLED -lcublas -lcudnn -lcurand -lcudadevrt -lcudart_static \
 		-L$(CUDA_STATIC_LIB_DIR) $(OBJS) $(PYBIND_INCLUDES) -I$(PYTHON_INCLUDE) -L$(PYTHON_LIB_DIR) -lpython3.10 \
 		-o $(TARGET) -std=c++14
 	@echo "Successfully built $(TARGET)"
-	@$(MAKE) generate_stubs
 
 # Compile .cu files to .o
 %.o: %.cu

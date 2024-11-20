@@ -3,6 +3,7 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 #include <cudnn.h>
+#include <numeric>
 
 namespace ryupy
 {
@@ -17,6 +18,35 @@ namespace ryupy
             cudaMalloc(&d_data, size);
 
             cudaMemcpy(d_data, hostData.data(), size, cudaMemcpyHostToDevice);
+
+            cudnnCreateTensorDescriptor(&tensor_desc);
+
+            int nbDims = shape.size();
+            std::vector<int> strideA(nbDims);
+
+            strideA[nbDims - 1] = 1;
+            for (int i = nbDims - 2; i >= 0; --i)
+            {
+                strideA[i] = strideA[i + 1] * shape[i + 1];
+            }
+
+            cudnnSetTensorNdDescriptor(tensor_desc,
+                                       CUDNN_DATA_FLOAT,
+                                       nbDims,
+                                       shape.data(),
+                                       strideA.data());
+        }
+
+        CudaTensor::CudaTensor(std::vector<int> shape) : Tensor()
+        {
+            size = std::accumulate(shape.begin(), shape.end(), 1, std::multiplies<int>()) * sizeof(float);
+
+            std::cout << "init sexing " << size << std::endl;
+
+            this->size = size;
+            this->shape = shape;
+
+            cudaMalloc(&d_data, size);
 
             cudnnCreateTensorDescriptor(&tensor_desc);
 
@@ -60,7 +90,7 @@ namespace ryupy
                                        shape.data(),
                                        strideA.data());
         }
-
+ 
         py::object CudaTensor::getFlattenedData() const
         {
             std::vector<float> hostData(size / sizeof(float));
@@ -70,6 +100,7 @@ namespace ryupy
 
         py::object CudaTensor::getData() const
         {
+            std::cout << "sex " << size << std::endl;
             std::vector<float> hostData(size / sizeof(float));
             cudaMemcpy(hostData.data(), d_data, size, cudaMemcpyDeviceToHost);
             return reshapeData(hostData, shape);

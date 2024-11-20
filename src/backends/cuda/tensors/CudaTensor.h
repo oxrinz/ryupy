@@ -22,8 +22,18 @@ namespace ryupy
 
             CudaTensor() = default;
             explicit CudaTensor(const py::object &data);
+            explicit CudaTensor(std::vector<int> shape);
             explicit CudaTensor(int size, std::vector<int> shape);
             virtual ~CudaTensor();
+
+            static std::shared_ptr<CudaTensor> zeros(const std::vector<int> &shape);
+            static std::shared_ptr<CudaTensor> ones(const std::vector<int> &shape);
+            static std::shared_ptr<CudaTensor> fill(const std::vector<int> &shape, float value);
+            static std::shared_ptr<CudaTensor> arange(float start, float stop, float step = 1.0f);
+            static std::shared_ptr<CudaTensor> linspace(float start, float stop, int num);
+            static std::shared_ptr<CudaTensor> eye(int n);
+            static std::shared_ptr<CudaTensor> random_uniform(const std::vector<int> &shape, float low = 0.0f, float high = 1.0f);
+            static std::shared_ptr<CudaTensor> random_normal(const std::vector<int> &shape, float mean = 0.0f, float std = 1.0f);
 
             py::object getData() const;
             py::object getFlattenedData() const;

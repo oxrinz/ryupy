@@ -31,6 +31,13 @@ namespace ryupy
             {
                 std::shared_ptr<CudaTensor> output = tensor.matmul(weight);
 
+                printf("Shape: [");
+                for (size_t i = 0; i < tensor.shape.size(); i++)
+                {
+                    printf("%d%s", tensor.shape[i], i < tensor.shape.size() - 1 ? ", " : "");
+                }
+                printf("]\n");
+
                 return output->operator+(bias);
             }
         }
