@@ -6,13 +6,19 @@
 
 namespace py = pybind11;
 
-PYBIND11_MODULE(ryupy, m)
+PYBIND11_MODULE(_ryupy, m)
 {
     py::class_<ryupy::Tensor, std::shared_ptr<ryupy::Tensor>>(m, "Tensor")
         .def(py::init<py::object>())
         .def_property_readonly("shape", &ryupy::Tensor::getShape)
         .def_property_readonly("flattenedData", &ryupy::Tensor::getFlattenedData)
         .def_property_readonly("data", &ryupy::Tensor::getData)
+
+        .def_property("grad", [](ryupy::Tensor &t)
+                      { return t.grad; }, [](ryupy::Tensor &t, std::shared_ptr<ryupy::Tensor> new_grad)
+                      { t.grad = new_grad; })
+        .def_readwrite("requires_grad", &ryupy::Tensor::requires_grad)
+        .def("backward", &ryupy::Tensor::backward)
 
         .def("__repr__", &ryupy::Tensor::repr)
 
@@ -53,20 +59,43 @@ PYBIND11_MODULE(ryupy, m)
 
         .def("__matmul__", &ryupy::Tensor::matmul);
 
-    m.def("zeros", &ryupy::Tensor::zeros)
-        .def("ones", &ryupy::Tensor::ones)
-        .def("fill", &ryupy::Tensor::fill)
-        .def("arange", &ryupy::Tensor::arange)
-        .def("linspace", &ryupy::Tensor::linspace)
-        .def("eye", &ryupy::Tensor::eye)
+    m.def("zeros", &ryupy::Tensor::zeros,
+          py::arg("shape"),
+          py::kw_only(),
+          py::arg("grad") = false)
+        .def("ones", &ryupy::Tensor::ones,
+             py::arg("shape"),
+             py::kw_only(),
+             py::arg("grad") = false)
+        .def("fill", &ryupy::Tensor::fill,
+             py::arg("shape"),
+             py::arg("value"),
+             py::kw_only(),
+             py::arg("grad") = false)
+        .def("arange", &ryupy::Tensor::arange,
+             py::arg("start"),
+             py::arg("stop"),
+             py::kw_only(),
+             py::arg("step") = 1.0f,
+             py::arg("grad") = false)
+        .def("linspace", &ryupy::Tensor::linspace,
+             py::arg("start"),
+             py::arg("stop"),
+             py::arg("num"),
+             py::kw_only(),
+             py::arg("grad") = false)
         .def("rand", &ryupy::Tensor::random_uniform,
              py::arg("shape"),
+             py::kw_only(),
              py::arg("low") = 0.0f,
-             py::arg("high") = 1.0f)
+             py::arg("high") = 1.0f,
+             py::arg("grad") = false)
         .def("randn", &ryupy::Tensor::random_normal,
              py::arg("shape"),
+             py::kw_only(),
              py::arg("mean") = 0.0f,
-             py::arg("std") = 1.0f);
+             py::arg("std") = 1.0f,
+             py::arg("grad") = false);
 
     auto nn = m.def_submodule("nn");
 

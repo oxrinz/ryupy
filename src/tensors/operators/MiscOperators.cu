@@ -9,7 +9,7 @@
 
 namespace ryupy
 {
-    std::shared_ptr<Tensor> Tensor::pow(const Tensor &other) const
+    std::shared_ptr<Tensor> Tensor::pow(Tensor &other)
     {
         return handleOperator(other, powerKernel);
     }

@@ -2,10 +2,11 @@
 #include <cuda_runtime.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
+#include <iostream>
 
 namespace ryupy
 {
-    std::shared_ptr<Tensor> Tensor::handleOperator(const Tensor &other, KernelFunc kernel) const
+    std::shared_ptr<Tensor> Tensor::handleOperator(Tensor &other, KernelFunc kernel)
     {
         if (shape != other.shape)
         {
@@ -13,6 +14,16 @@ namespace ryupy
         }
 
         auto result = std::make_shared<Tensor>(*this);
+
+        std::cout << "sex " << requires_grad << std::endl;
+
+        if (requires_grad || other.requires_grad)
+        {
+            result->requires_grad = true;
+            result->is_leaf = false;
+            result->prev.push_back(shared_from_this());
+            result->prev.push_back(other.shared_from_this());
+        }
 
         cudaMalloc(&result->d_data, size);
 

@@ -6,27 +6,31 @@
 
 namespace ryupy
 {
-    std::shared_ptr<Tensor> Tensor::operator+(const Tensor &other) const
+    std::shared_ptr<Tensor> Tensor::operator+(Tensor &other)
     {
-        return handleOperator(other, addKernel);
+        std::shared_ptr<Tensor> tensor = handleOperator(other, addKernel);
+
+        tensor->backward_fn = std::bind(&Tensor::addBackward, tensor.get());
+
+        return tensor;
     }
 
-    std::shared_ptr<Tensor> Tensor::operator-(const Tensor &other) const
+    std::shared_ptr<Tensor> Tensor::operator-(Tensor &other)
     {
         return handleOperator(other, subtractKernel);
     }
 
-    std::shared_ptr<Tensor> Tensor::operator*(const Tensor &other) const
+    std::shared_ptr<Tensor> Tensor::operator*(Tensor &other)
     {
         return handleOperator(other, multiplyKernel);
     }
 
-    std::shared_ptr<Tensor> Tensor::operator/(const Tensor &other) const
+    std::shared_ptr<Tensor> Tensor::operator/(Tensor &other)
     {
         return handleOperator(other, divideKernel);
     }
 
-    std::shared_ptr<Tensor> Tensor::operator%(const Tensor &other) const
+    std::shared_ptr<Tensor> Tensor::operator%(Tensor &other)
     {
         return handleOperator(other, moduloKernel);
     }

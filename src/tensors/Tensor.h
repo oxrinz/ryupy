@@ -19,11 +19,11 @@ namespace ryupy
         cudnnTensorDescriptor_t tensor_desc;
 
         std::vector<std::shared_ptr<Tensor>> prev;
-        std::vector<std::weak_ptr<Tensor>> next;
-        std::shared_ptr<Tensor> grad;        
-        bool requiresGrad;                   
-        std::function<void(void)> backward_fn; 
+        std::shared_ptr<Tensor> grad;
+        bool requires_grad;
+        std::function<void(void)> backward_fn;
         bool is_leaf;
+        void backward();
 
         Tensor() = default;
         explicit Tensor(const py::object &data);
@@ -31,18 +31,18 @@ namespace ryupy
         explicit Tensor(int size, std::vector<int> shape);
         virtual ~Tensor();
 
-        static std::shared_ptr<Tensor> zeros(const std::vector<int> &shape);
-        static std::shared_ptr<Tensor> ones(const std::vector<int> &shape);
-        static std::shared_ptr<Tensor> fill(const std::vector<int> &shape, float value);
-        static std::shared_ptr<Tensor> arange(float start, float stop, float step = 1.0f);
-        static std::shared_ptr<Tensor> linspace(float start, float stop, int num);
-        static std::shared_ptr<Tensor> eye(int n);
-        static std::shared_ptr<Tensor> random_uniform(const std::vector<int> &shape, float low = 0.0f, float high = 1.0f);
-        static std::shared_ptr<Tensor> random_normal(const std::vector<int> &shape, float mean = 0.0f, float std = 1.0f);
-        static std::shared_ptr<Tensor> xavier_normal(const std::vector<int> &shape);
-        static std::shared_ptr<Tensor> xavier_uniform(const std::vector<int> &shape);
-        static std::shared_ptr<Tensor> kaiming_normal(const std::vector<int> &shape);
-        static std::shared_ptr<Tensor> kaiming_uniform(const std::vector<int> &shape);
+        static std::shared_ptr<Tensor> zeros(const std::vector<int> &shape, bool grad = false);
+        static std::shared_ptr<Tensor> ones(const std::vector<int> &shape, bool grad = false);
+        static std::shared_ptr<Tensor> fill(const std::vector<int> &shape, float value, bool grad = false);
+        static std::shared_ptr<Tensor> arange(float start, float stop, float step = 1.0f, bool grad = false);
+        static std::shared_ptr<Tensor> linspace(float start, float stop, int num, bool grad = false);
+        static std::shared_ptr<Tensor> eye(int n, bool grad = false);
+        static std::shared_ptr<Tensor> random_uniform(const std::vector<int> &shape, float low = 0.0f, float high = 1.0f, bool grad = false);
+        static std::shared_ptr<Tensor> random_normal(const std::vector<int> &shape, float mean = 0.0f, float std = 1.0f, bool grad = false);
+        static std::shared_ptr<Tensor> xavier_normal(const std::vector<int> &shape, bool grad = false);
+        static std::shared_ptr<Tensor> xavier_uniform(const std::vector<int> &shape, bool grad = false);
+        static std::shared_ptr<Tensor> kaiming_normal(const std::vector<int> &shape, bool grad = false);
+        static std::shared_ptr<Tensor> kaiming_uniform(const std::vector<int> &shape, bool grad = false);
 
         static std::pair<int, int> calculate_fans(const std::vector<int> &shape);
 
@@ -60,7 +60,7 @@ namespace ryupy
         typedef void (*KernelShiftFunc)(const float *, float *, int, int);
         typedef void (*KernelEmptyFunc)(const float *, float *, int);
 
-        std::shared_ptr<Tensor> handleOperator(const Tensor &other, KernelFunc kernel) const;
+        std::shared_ptr<Tensor> handleOperator(Tensor &other, KernelFunc kernel);
         std::shared_ptr<Tensor> handleInPlaceOperator(const Tensor &other, KernelFunc kernel);
         std::shared_ptr<Tensor> handleShiftOperator(const int shift, KernelShiftFunc kernel) const;
         std::shared_ptr<Tensor> handleEmptyOperator(KernelEmptyFunc kernel) const;
@@ -68,11 +68,11 @@ namespace ryupy
         std::shared_ptr<Tensor> handleInPlaceEmptyOperator(KernelEmptyFunc kernel);
 
         // Basic arithmetic operators
-        std::shared_ptr<Tensor> operator+(const Tensor &other) const;
-        std::shared_ptr<Tensor> operator-(const Tensor &other) const;
-        std::shared_ptr<Tensor> operator*(const Tensor &other) const;
-        std::shared_ptr<Tensor> operator/(const Tensor &other) const;
-        std::shared_ptr<Tensor> operator%(const Tensor &other) const;
+        std::shared_ptr<Tensor> operator+(Tensor &other);
+        std::shared_ptr<Tensor> operator-(Tensor &other);
+        std::shared_ptr<Tensor> operator*(Tensor &other);
+        std::shared_ptr<Tensor> operator/(Tensor &other);
+        std::shared_ptr<Tensor> operator%(Tensor &other);
 
         // In-place arithmetic operators
         std::shared_ptr<Tensor> operator+=(const Tensor &other);
@@ -82,21 +82,21 @@ namespace ryupy
         std::shared_ptr<Tensor> operator%=(const Tensor &other);
 
         // Power operator
-        std::shared_ptr<Tensor> pow(const Tensor &other) const;
+        std::shared_ptr<Tensor> pow(Tensor &other);
         std::shared_ptr<Tensor> ipow(const Tensor &other);
 
         // Comparison operators
-        std::shared_ptr<Tensor> operator==(const Tensor &other) const;
-        std::shared_ptr<Tensor> operator!=(const Tensor &other) const;
-        std::shared_ptr<Tensor> operator<(const Tensor &other) const;
-        std::shared_ptr<Tensor> operator<=(const Tensor &other) const;
-        std::shared_ptr<Tensor> operator>(const Tensor &other) const;
-        std::shared_ptr<Tensor> operator>=(const Tensor &other) const;
+        std::shared_ptr<Tensor> operator==(Tensor &other);
+        std::shared_ptr<Tensor> operator!=(Tensor &other);
+        std::shared_ptr<Tensor> operator<(Tensor &other);
+        std::shared_ptr<Tensor> operator<=(Tensor &other);
+        std::shared_ptr<Tensor> operator>(Tensor &other);
+        std::shared_ptr<Tensor> operator>=(Tensor &other);
 
         // Bitwise operators
-        std::shared_ptr<Tensor> operator&(const Tensor &other) const;
-        std::shared_ptr<Tensor> operator|(const Tensor &other) const;
-        std::shared_ptr<Tensor> operator^(const Tensor &other) const;
+        std::shared_ptr<Tensor> operator&(Tensor &other);
+        std::shared_ptr<Tensor> operator|(Tensor &other);
+        std::shared_ptr<Tensor> operator^(Tensor &other);
         std::shared_ptr<Tensor> operator~() const;
         std::shared_ptr<Tensor> operator<<(int shift) const;
         std::shared_ptr<Tensor> operator>>(int shift) const;
@@ -130,5 +130,8 @@ namespace ryupy
         // std::shared_ptr<Tensor> floor() const;
         // std::shared_ptr<Tensor> ceil() const;
         // std::shared_ptr<Tensor> round() const;
+
+        // Backward functions
+        void addBackward();
     };
 }

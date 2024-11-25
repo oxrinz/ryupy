@@ -6,32 +6,32 @@
 
 namespace ryupy
 {
-    std::shared_ptr<Tensor> Tensor::operator==(const Tensor &other) const
+    std::shared_ptr<Tensor> Tensor::operator==(Tensor &other)
     {
         return handleOperator(other, equalityKernel);
     }
 
-    std::shared_ptr<Tensor> Tensor::operator!=(const Tensor &other) const
+    std::shared_ptr<Tensor> Tensor::operator!=(Tensor &other)
     {
         return handleOperator(other, inequalityKernel);
     }
 
-    std::shared_ptr<Tensor> Tensor::operator<(const Tensor &other) const
+    std::shared_ptr<Tensor> Tensor::operator<(Tensor &other)
     {
         return handleOperator(other, lessThanKernel);
     }
 
-    std::shared_ptr<Tensor> Tensor::operator<=(const Tensor &other) const
+    std::shared_ptr<Tensor> Tensor::operator<=(Tensor &other)
     {
         return handleOperator(other, lessThanOrEqualKernel);
     }
 
-    std::shared_ptr<Tensor> Tensor::operator>(const Tensor &other) const
+    std::shared_ptr<Tensor> Tensor::operator>(Tensor &other)
     {
         return handleOperator(other, greaterThanKernel);
     }
 
-    std::shared_ptr<Tensor> Tensor::operator>=(const Tensor &other) const
+    std::shared_ptr<Tensor> Tensor::operator>=(Tensor &other)
     {
         return handleOperator(other, greaterThanOrEqualKernel);
     }

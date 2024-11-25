@@ -6,17 +6,17 @@
 
 namespace ryupy
 {
-    std::shared_ptr<Tensor> Tensor::operator&(const Tensor &other) const
+    std::shared_ptr<Tensor> Tensor::operator&(Tensor &other)
     {
         return handleOperator(other, bitwiseAndKernel);
     }
 
-    std::shared_ptr<Tensor> Tensor::operator|(const Tensor &other) const
+    std::shared_ptr<Tensor> Tensor::operator|(Tensor &other)
     {
         return handleOperator(other, bitwiseOrKernel);
     }
 
-    std::shared_ptr<Tensor> Tensor::operator^(const Tensor &other) const
+    std::shared_ptr<Tensor> Tensor::operator^(Tensor &other)
     {
         return handleOperator(other, bitwiseXorKernel);
     }
