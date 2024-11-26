@@ -8,26 +8,22 @@ namespace ryupy
 {
     std::shared_ptr<Tensor> Tensor::operator+(Tensor &other)
     {
-        std::shared_ptr<Tensor> tensor = handleOperator(other, addKernel);
-
-        tensor->backward_fn = std::bind(&Tensor::addBackward, tensor.get());
-
-        return tensor;
+        return handleOperator(other, addKernel, &Tensor::addBackward);
     }
 
     std::shared_ptr<Tensor> Tensor::operator-(Tensor &other)
     {
-        return handleOperator(other, subtractKernel);
+        return handleOperator(other, subtractKernel, &Tensor::subtractBackward);
     }
 
     std::shared_ptr<Tensor> Tensor::operator*(Tensor &other)
     {
-        return handleOperator(other, multiplyKernel);
+        return handleOperator(other, multiplyKernel, &Tensor::multiplyBackward);
     }
 
     std::shared_ptr<Tensor> Tensor::operator/(Tensor &other)
     {
-        return handleOperator(other, divideKernel);
+        return handleOperator(other, divideKernel, &Tensor::divideBackward);
     }
 
     std::shared_ptr<Tensor> Tensor::operator%(Tensor &other)
@@ -35,27 +31,27 @@ namespace ryupy
         return handleOperator(other, moduloKernel);
     }
 
-    std::shared_ptr<Tensor> Tensor::operator+=(const Tensor &other)
+    std::shared_ptr<Tensor> Tensor::operator+=(Tensor &other)
     {
         return handleInPlaceOperator(other, addKernel);
     }
 
-    std::shared_ptr<Tensor> Tensor::operator-=(const Tensor &other)
+    std::shared_ptr<Tensor> Tensor::operator-=(Tensor &other)
     {
         return handleInPlaceOperator(other, subtractKernel);
     }
 
-    std::shared_ptr<Tensor> Tensor::operator*=(const Tensor &other)
+    std::shared_ptr<Tensor> Tensor::operator*=(Tensor &other)
     {
         return handleInPlaceOperator(other, multiplyKernel);
     }
 
-    std::shared_ptr<Tensor> Tensor::operator/=(const Tensor &other)
+    std::shared_ptr<Tensor> Tensor::operator/=(Tensor &other)
     {
         return handleInPlaceOperator(other, divideKernel);
     }
 
-    std::shared_ptr<Tensor> Tensor::operator%=(const Tensor &other)
+    std::shared_ptr<Tensor> Tensor::operator%=(Tensor &other)
     {
         return handleInPlaceOperator(other, moduloKernel);
     }

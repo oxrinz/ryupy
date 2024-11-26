@@ -39,7 +39,6 @@ namespace ryupy
         return reshapeData(hostData, shape);
     }
 
-
     const std::vector<int> Tensor::getShape() const
     {
         return shape;
@@ -48,8 +47,7 @@ namespace ryupy
     std::string Tensor::repr() const
     {
         std::stringstream ss;
-        ss << RED << "shape" << std::endl
-           << "[";
+        ss << RED << "[";
 
         for (size_t i = 0; i < shape.size(); i++)
         {
@@ -60,7 +58,7 @@ namespace ryupy
 
         ss << "]";
         ss << std::endl;
-        ss << MAGENTA << "data" << std::endl;
+        ss << MAGENTA;
 
         int total_elements = std::accumulate(shape.begin(), shape.end(), 1, std::multiplies<int>());
         std::vector<float> h_data(total_elements);
@@ -158,6 +156,8 @@ namespace ryupy
             }
             ss << ">";
         }
+
+        ss << RESET;
 
         return ss.str();
     }

@@ -26,4 +26,31 @@ namespace ryupy
 
         return {fan_in, fan_out};
     }
+
+    std::shared_ptr<Tensor> Tensor::copy() const
+    {
+        auto result = std::make_shared<Tensor>(shape);
+
+        cudaMemcpy(result->d_data, d_data, size, cudaMemcpyDeviceToDevice);
+
+        result->requires_grad = requires_grad;
+        result->is_leaf = is_leaf;
+        result->size = size;
+
+        int nbDims = shape.size();
+        std::vector<int> strideA(nbDims);
+        strideA[nbDims - 1] = 1;
+        for (int i = nbDims - 2; i >= 0; --i)
+        {
+            strideA[i] = strideA[i + 1] * shape[i + 1];
+        }
+        cudnnSetTensorNdDescriptor(result->tensor_desc,
+                                   CUDNN_DATA_FLOAT,
+                                   nbDims,
+                                   shape.data(),
+                                   strideA.data());
+
+        return result;
+    }
+
 }

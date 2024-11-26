@@ -2,12 +2,14 @@
 #include "Kernels.h"
 #include <numeric>
 #include <curand.h>
+
 namespace ryupy
 {
     std::shared_ptr<Tensor> Tensor::zeros(const std::vector<int> &shape, bool grad)
     {
         std::shared_ptr<Tensor> tensor = std::make_shared<Tensor>(shape);
         tensor->requires_grad = grad;
+        tensor->is_leaf = true;
 
         int blockSize = 256;
         int numBlocks = (tensor->size + blockSize - 1) / blockSize;
@@ -20,6 +22,7 @@ namespace ryupy
     {
         std::shared_ptr<Tensor> tensor = std::make_shared<Tensor>(shape);
         tensor->requires_grad = grad;
+        tensor->is_leaf = true;
 
         int blockSize = 256;
         int numBlocks = (tensor->size + blockSize - 1) / blockSize;
@@ -32,6 +35,7 @@ namespace ryupy
     {
         std::shared_ptr<Tensor> tensor = std::make_shared<Tensor>(shape);
         tensor->requires_grad = grad;
+        tensor->is_leaf = true;
 
         int blockSize = 256;
         int numBlocks = (tensor->size + blockSize - 1) / blockSize;
@@ -47,6 +51,7 @@ namespace ryupy
 
         std::shared_ptr<Tensor> tensor = std::make_shared<Tensor>(shape);
         tensor->requires_grad = grad;
+        tensor->is_leaf = true;
 
         int blockSize = 256;
         int numBlocks = (size + blockSize - 1) / blockSize;
@@ -59,6 +64,7 @@ namespace ryupy
         std::vector<int> shape = {num};
         auto tensor = std::make_shared<Tensor>(shape);
         tensor->requires_grad = grad;
+        tensor->is_leaf = true;
 
         float step = (stop - start) / (num - 1);
         int blockSize = 256;
@@ -72,6 +78,7 @@ namespace ryupy
         std::vector<int> shape = {n, n};
         auto tensor = std::make_shared<Tensor>(shape);
         tensor->requires_grad = grad;
+        tensor->is_leaf = true;
 
         int blockSize = 256;
         int numBlocks = (n * n + blockSize - 1) / blockSize;
@@ -83,10 +90,14 @@ namespace ryupy
     {
         auto tensor = std::make_shared<Tensor>(shape);
         tensor->requires_grad = grad;
+        tensor->is_leaf = true;
+
+        static unsigned long long seed = time(nullptr);
+        seed++;
 
         curandGenerator_t gen;
         curandCreateGenerator(&gen, CURAND_RNG_PSEUDO_DEFAULT);
-        curandSetPseudoRandomGeneratorSeed(gen, static_cast<unsigned long long>(time(nullptr)));
+        curandSetPseudoRandomGeneratorSeed(gen, seed);
         curandGenerateUniform(gen, tensor->d_data, tensor->size);
 
         if (low != 0.0f || high != 1.0f)
@@ -104,10 +115,14 @@ namespace ryupy
     {
         auto tensor = std::make_shared<Tensor>(shape);
         tensor->requires_grad = grad;
+        tensor->is_leaf = true;
+
+        static unsigned long long seed = time(nullptr);
+        seed++;
 
         curandGenerator_t gen;
         curandCreateGenerator(&gen, CURAND_RNG_PSEUDO_DEFAULT);
-        curandSetPseudoRandomGeneratorSeed(gen, static_cast<unsigned long long>(time(nullptr)));
+        curandSetPseudoRandomGeneratorSeed(gen, seed);
         curandGenerateNormal(gen, tensor->d_data, tensor->size, mean, std_dev);
         curandDestroyGenerator(gen);
         return tensor;
@@ -121,6 +136,7 @@ namespace ryupy
         float bound = std::sqrt(6.0f / (fan_in + fan_out));
         auto tensor = random_uniform(shape, -bound, bound);
         tensor->requires_grad = grad;
+        tensor->is_leaf = true;
         return tensor;
     }
 
@@ -132,6 +148,7 @@ namespace ryupy
         float std = std::sqrt(2.0f / (fan_in + fan_out));
         auto tensor = random_normal(shape, 0.0f, std);
         tensor->requires_grad = grad;
+        tensor->is_leaf = true;
         return tensor;
     }
 
@@ -142,6 +159,7 @@ namespace ryupy
         float bound = std::sqrt(2.0f) * std::sqrt(3.0f / fan_in);
         auto tensor = random_uniform(shape, -bound, bound);
         tensor->requires_grad = grad;
+        tensor->is_leaf = true;
         return tensor;
     }
 
@@ -152,6 +170,7 @@ namespace ryupy
         float std = std::sqrt(2.0f / fan_in);
         auto tensor = random_normal(shape, 0.0f, std);
         tensor->requires_grad = grad;
+        tensor->is_leaf = true;
         return tensor;
     }
 }

@@ -2,6 +2,7 @@
 #include <cuda_runtime.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
+#include <iostream>
 
 namespace ryupy
 {
@@ -19,13 +20,22 @@ namespace ryupy
 
         if (!grad)
         {
-            // If this is the output tensor, initialize grad with ones
-            grad = std::make_shared<Tensor>(shape);
-            // Fill grad with ones
-            std::vector<float> ones(size, 1.0f);
-            cudaMemcpy(grad->d_data, ones.data(), size * sizeof(float), cudaMemcpyHostToDevice);
+            grad = Tensor::ones(shape);
+        }
+
+        if (is_leaf)
+        {
+            return;
         }
 
         backward_fn();
+
+        for (const auto &prev : prev)
+        {
+            if (prev->is_leaf == false)
+            {
+                prev->backward();
+            }
+        }
     }
 }

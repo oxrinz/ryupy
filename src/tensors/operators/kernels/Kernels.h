@@ -23,4 +23,7 @@ namespace ryupy
     __global__ void bitwiseNotKernel(const float *a, float *result, int size);
     __global__ void leftShiftKernel(const float *a, float *result, int size, int shift);
     __global__ void rightShiftKernel(const float *a, float *result, int size, int shift);
+
+    __global__ void logKernel(const float *input, float *output, int size);
+    __global__ void negateKernel(const float *input, float *output, int size);
 }

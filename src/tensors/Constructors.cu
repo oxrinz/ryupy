@@ -25,7 +25,7 @@
 
 namespace ryupy
 {
-    Tensor::Tensor(const py::object &py_data) 
+    Tensor::Tensor(const py::object &py_data)
     {
         std::vector<float> hostData = flattenPythonData(py_data);
 
@@ -107,8 +107,16 @@ namespace ryupy
 
     Tensor::~Tensor()
     {
-        cudnnDestroyTensorDescriptor(tensor_desc);
-        cudaFree(d_data);
+        if (d_data != nullptr)
+        {
+            cudaFree(d_data);
+            d_data = nullptr;
+        }
+        if (tensor_desc != nullptr)
+        {
+            cudnnDestroyTensorDescriptor(tensor_desc);
+            tensor_desc = nullptr;
+        }
+        // Don't need to explicitly delete grad since it's a shared_ptr
     }
-
 }

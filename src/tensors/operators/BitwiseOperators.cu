@@ -36,17 +36,17 @@ namespace ryupy
         return handleShiftOperator(shift, rightShiftKernel);
     }
 
-    std::shared_ptr<Tensor> Tensor::operator&=(const Tensor &other)
+    std::shared_ptr<Tensor> Tensor::operator&=(Tensor &other)
     {
         return handleInPlaceOperator(other, bitwiseAndKernel);
     }
 
-    std::shared_ptr<Tensor> Tensor::operator|=(const Tensor &other)
+    std::shared_ptr<Tensor> Tensor::operator|=(Tensor &other)
     {
         return handleInPlaceOperator(other, bitwiseOrKernel);
     }
 
-    std::shared_ptr<Tensor> Tensor::operator^=(const Tensor &other)
+    std::shared_ptr<Tensor> Tensor::operator^=(Tensor &other)
     {
         return handleInPlaceOperator(other, bitwiseXorKernel);
     }

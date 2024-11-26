@@ -11,10 +11,10 @@ namespace ryupy
 {
     std::shared_ptr<Tensor> Tensor::pow(Tensor &other)
     {
-        return handleOperator(other, powerKernel);
+        return handleOperator(other, powerKernel, &Tensor::powerBackward);
     }
 
-    std::shared_ptr<Tensor> Tensor::ipow(const Tensor &other)
+    std::shared_ptr<Tensor> Tensor::ipow(Tensor &other)
     {
         return handleInPlaceOperator(other, powerKernel);
     }
