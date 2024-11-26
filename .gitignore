@@ -3,5 +3,3 @@ graphics
 __pycache__
 
 *.o
-
-sb.py

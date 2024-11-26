@@ -19,7 +19,7 @@ namespace ryupy
         return handleInPlaceOperator(other, powerKernel);
     }
 
-    std::shared_ptr<Tensor> Tensor::matmul(const Tensor &other) const
+    std::shared_ptr<Tensor> Tensor::matmul(Tensor &other)
     {
         if (shape.size() < 2 || other.shape.size() < 2)
         {
@@ -60,6 +60,18 @@ namespace ryupy
         size_t total_elements = batchSize * m * n;
 
         std::shared_ptr<Tensor> result = std::make_shared<Tensor>(total_elements * sizeof(float), result_shape);
+
+        if (requires_grad || other.requires_grad)
+        {
+            result->requires_grad = true;
+            result->is_leaf = false;
+            result->prev.push_back(shared_from_this());
+            result->prev.push_back(other.shared_from_this());
+            result->backward_fn = [result]()
+            {
+                result.get()->matmulBackward();
+            };
+        }
 
         int lda = k;
         int ldb = k;

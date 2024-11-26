@@ -117,7 +117,7 @@ namespace ryupy
         std::shared_ptr<Tensor> operator>>=(int shift);
 
         // Matrix multiplication
-        std::shared_ptr<Tensor> matmul(const Tensor &other) const;
+        std::shared_ptr<Tensor> matmul(Tensor &other);
 
         // Logical operators (for boolean tensors)
         // std::shared_ptr<Tensor> logical_and(const Tensor &other) const;
@@ -129,7 +129,7 @@ namespace ryupy
         // std::shared_ptr<Tensor> abs() const;  // Absolute value
         // std::shared_ptr<Tensor> sqrt() const; // Square root
         // std::shared_ptr<Tensor> exp() const;  // Exponential
-        std::shared_ptr<Tensor> log() const;  
+        std::shared_ptr<Tensor> log() const;
         // std::shared_ptr<Tensor> sin() const;  // Sine
         // std::shared_ptr<Tensor> cos() const;  // Cosine
         // std::shared_ptr<Tensor> tan() const;  // Tangent
@@ -154,6 +154,6 @@ namespace ryupy
         // void divideInPlaceBackward();
         // void powerInPlaceBackward();
 
-        void matmulBackward() const;
+        void matmulBackward();
     };
 }

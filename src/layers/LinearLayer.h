@@ -21,7 +21,7 @@ namespace ryupy
             std::shared_ptr<Tensor> bias;
 
             LinearLayer(int in_features, int out_features, InitType init_type);
-            std::shared_ptr<Tensor> forward(const Tensor &tensor);
+            std::shared_ptr<Tensor> forward(Tensor &tensor);
         };
     }
 }

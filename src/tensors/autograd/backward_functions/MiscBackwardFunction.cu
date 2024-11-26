@@ -28,4 +28,19 @@ namespace ryupy
             input2->grad = grad->copy()->operator*(*temp);
         }
     }
+
+    void Tensor::matmulBackward()
+    {
+        auto input1 = prev[0];
+        auto input2 = prev[1];
+
+        if (input1->requires_grad)
+        {
+            input1->grad = grad->copy()->matmul(*input2);
+        }
+        if (input2->requires_grad)
+        {
+            input2->grad = grad->copy()->matmul(*input1);
+        }
+    }
 }

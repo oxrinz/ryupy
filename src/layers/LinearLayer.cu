@@ -30,7 +30,7 @@ namespace ryupy
             bias = Tensor::zeros(bias_shape);
         }
 
-        std::shared_ptr<Tensor> LinearLayer::forward(const Tensor &tensor)
+        std::shared_ptr<Tensor> LinearLayer::forward(Tensor &tensor)
         {
             return tensor.matmul(*weight);
         }
