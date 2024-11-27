@@ -57,10 +57,15 @@ namespace ryupy
         py::object reshapeData(const std::vector<float> &data, const std::vector<int> &shape) const;
 
         // Python interface shit
+        std::shared_ptr<Tensor> parent; // Shit solution but it works, change later maybe
+        int parent_index;              
+
         std::string repr() const;
         const std::vector<int> getShape() const;
         py::object getData() const;
         py::object getFlattenedData() const;
+        py::object getItem(int index);
+        void setItem(int index, const py::object &value);
 
         // Operation kernel typedefs
         typedef void (*KernelFunc)(const float *, const float *, float *, int);
@@ -133,7 +138,7 @@ namespace ryupy
         // std::shared_ptr<Tensor> sin() const;  // Sine
         // std::shared_ptr<Tensor> cos() const;  // Cosine
         // std::shared_ptr<Tensor> tan() const;  // Tangent
-        std::shared_ptr<Tensor> negate(); // Negation
+        std::shared_ptr<Tensor> negate();
 
         // Floor, ceil, and rounding
         // std::shared_ptr<Tensor> floor() const;

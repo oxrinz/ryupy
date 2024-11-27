@@ -1,8 +1,12 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/operators.h>
 #include <pybind11/stl.h>
+#include <pybind11/functional.h>
 #include "../tensors/Tensor.h"
-#include "../layers/LinearLayer.h"
+#include "../nn/layers/Layer.h"
+#include "../nn/layers/basic/LinearLayer.h"
+#include "../nn/layerbank/LayerBank.h"
+#include "../nn/net/Net.h"
 
 namespace py = pybind11;
 
@@ -23,6 +27,9 @@ PYBIND11_MODULE(_ryupy, m)
          .def("copy", &ryupy::Tensor::copy)
 
          .def("__repr__", &ryupy::Tensor::repr)
+
+         .def("__getitem__", &ryupy::Tensor::getItem)
+         .def("__setitem__", &ryupy::Tensor::setItem)
 
          .def("__add__", &ryupy::Tensor::operator+)
          .def("__sub__", &ryupy::Tensor::operator-)
@@ -111,9 +118,21 @@ PYBIND11_MODULE(_ryupy, m)
          .value("KAIMING_NORMAL", InitType::KAIMING_NORMAL)
          .export_values();
 
-     py::class_<ryupy::nn::LinearLayer>(nn, "Linear")
-         .def(py::init<int, int, InitType>())
-         .def("forward", &ryupy::nn::LinearLayer::forward)
+     py::class_<ryupy::nn::Layer, std::shared_ptr<ryupy::nn::Layer>>(nn, "Layer")
+         .def("forward", &ryupy::nn::Layer::forward)
+         .def("__call__", &ryupy::nn::Layer::forward);
+
+     py::class_<ryupy::nn::LinearLayer, ryupy::nn::Layer, std::shared_ptr<ryupy::nn::LinearLayer>>(nn, "Linear")
+         .def(py::init(&ryupy::nn::LinearLayer::create))
          .def_readwrite("weight", &ryupy::nn::LinearLayer::weight)
          .def_readwrite("bias", &ryupy::nn::LinearLayer::bias);
+
+     py::class_<ryupy::nn::LayerBank, std::shared_ptr<ryupy::nn::LayerBank>>(nn, "LayerBank")
+         .def(py::init(&ryupy::nn::LayerBank::create))
+         .def("__setattr__", &ryupy::nn::LayerBank::setLayer)
+         .def("__getattr__", &ryupy::nn::LayerBank::getLayer);
+
+     py::class_<ryupy::nn::Net, std::shared_ptr<ryupy::nn::Net>>(nn, "Net")
+         .def(py::init(&ryupy::nn::Net::create))
+         .def("__call__", &ryupy::nn::Net::forward);
 }

@@ -6,6 +6,7 @@
 #include <numeric>
 #include <sstream>
 #include <iomanip>
+#include <iostream>
 
 #define RESET "\033[0m"
 #define WHITE "\033[37m"
@@ -42,6 +43,71 @@ namespace ryupy
     const std::vector<int> Tensor::getShape() const
     {
         return shape;
+    }
+
+    py::object Tensor::getItem(int index)
+    {
+        if (index < 0 || index >= shape[0])
+        {
+            throw std::out_of_range("Index out of bounds");
+        }
+
+        // For 1D tensors, return a single value
+        if (shape.size() == 1)
+        {
+            float value;
+            cudaMemcpy(&value, d_data + index, sizeof(float), cudaMemcpyDeviceToHost);
+            return py::cast(value);
+        }
+
+        // For multi-dimensional tensors, return a slice
+        std::vector<int> newShape(shape.begin() + 1, shape.end());
+        int sliceSize = std::accumulate(newShape.begin(), newShape.end(), 1, std::multiplies<int>());
+
+        auto slice = std::make_shared<Tensor>(newShape);
+        // Store the parent tensor and index for later use in setItem
+        slice->parent = shared_from_this();
+        slice->parent_index = index;
+
+        cudaMemcpy(slice->d_data,
+                   d_data + (index * sliceSize),
+                   sliceSize * sizeof(float),
+                   cudaMemcpyDeviceToDevice);
+
+        return py::cast(slice);
+    }
+
+    void Tensor::setItem(int index, const py::object &value)
+    {
+        if (index < 0 || index >= shape[0])
+        {
+            throw std::out_of_range("Index out of bounds");
+        }
+
+        // Get the base tensor and accumulated index
+        float *target_data;
+        int total_offset;
+
+        if (parent)
+        {
+            // This is a slice, so calculate offset into parent tensor
+            int parent_stride = std::accumulate(shape.begin(), shape.end(), 1, std::multiplies<int>());
+            total_offset = (parent_index * parent_stride) + index;
+            target_data = parent->d_data;
+        }
+        else
+        {
+            // This is the root tensor
+            total_offset = index;
+            target_data = d_data;
+        }
+
+        // Set the single value
+        float newValue = value.cast<float>();
+        cudaMemcpy(target_data + total_offset,
+                   &newValue,
+                   sizeof(float),
+                   cudaMemcpyHostToDevice);
     }
 
     std::string Tensor::repr() const

@@ -1,12 +1,13 @@
 #pragma once
 
-#include "../tensors/Tensor.h"
+#include "../../../tensors/Tensor.h"
+#include "../Layer.h"
 
 namespace ryupy
 {
     namespace nn
     {
-        class LinearLayer
+        class LinearLayer : public Layer
         {
         public:
             enum class InitType
@@ -21,7 +22,9 @@ namespace ryupy
             std::shared_ptr<Tensor> bias;
 
             LinearLayer(int in_features, int out_features, InitType init_type);
-            std::shared_ptr<Tensor> forward(Tensor &tensor);
+            std::shared_ptr<Tensor> forward(Tensor &tensor) override;
+
+            static std::shared_ptr<LinearLayer> create(int in_features, int out_features, InitType init_type = InitType::XAVIER_UNIFORM);
         };
     }
 }
