@@ -28,7 +28,6 @@ namespace ryupy
 
         // Constructors
         Tensor() = default;
-        explicit Tensor(const py::object &data);
         explicit Tensor(std::vector<int> shape);
         explicit Tensor(int size, std::vector<int> shape);
         virtual ~Tensor();

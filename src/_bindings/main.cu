@@ -13,7 +13,6 @@ namespace py = pybind11;
 PYBIND11_MODULE(_ryupy, m)
 {
      py::class_<ryupy::Tensor, std::shared_ptr<ryupy::Tensor>>(m, "Tensor")
-         .def(py::init<py::object>())
          .def_property_readonly("shape", &ryupy::Tensor::getShape)
          .def_property_readonly("flattenedData", &ryupy::Tensor::getFlattenedData)
          .def_property_readonly("data", &ryupy::Tensor::getData)

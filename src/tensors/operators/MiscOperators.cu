@@ -146,8 +146,6 @@ namespace ryupy
                 { result.get()->matmulBackward(); };
             }
 
-            std::cout << "m: " << m << " n: " << n << " k: " << k << " batchSize: " << batchSize << std::endl;
-
             if (cublasSgemmStridedBatched(handle,
                                           CUBLAS_OP_N, CUBLAS_OP_N,
                                           n, m, k,

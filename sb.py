@@ -1,8 +1,13 @@
 import ryupy as rp
 
-tensor = rp.rand([3, 3])
+bank = rp.nn.LayerBank()
+bank.layer1 = rp.nn.Linear(3, 5, rp.nn.InitType.KAIMING_NORMAL)
 
-print(tensor)
-tensor[2][1] = 1111
-tensor2 = tensor[2][2]
-print(tensor2)
+def forward(x):
+    x = bank.layer1(x)
+    return x
+
+model = rp.nn.Net(bank, forward)
+
+tensor = rp.rand([1, 3])
+out = model(tensor)
