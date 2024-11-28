@@ -52,31 +52,6 @@ namespace ryupy
                                    strideA.data());
     }
 
-    Tensor::Tensor(int size, std::vector<int> shape) : Tensor()
-    {
-        this->size = size;
-        this->shape = shape;
-
-        cudaMalloc(&d_data, size);
-
-        cudnnCreateTensorDescriptor(&tensor_desc);
-
-        int nbDims = shape.size();
-        std::vector<int> strideA(nbDims);
-
-        strideA[nbDims - 1] = 1;
-        for (int i = nbDims - 2; i >= 0; --i)
-        {
-            strideA[i] = strideA[i + 1] * shape[i + 1];
-        }
-
-        cudnnSetTensorNdDescriptor(tensor_desc,
-                                   CUDNN_DATA_FLOAT,
-                                   nbDims,
-                                   shape.data(),
-                                   strideA.data());
-    }
-
     Tensor::~Tensor()
     {
         if (d_data != nullptr)
@@ -89,6 +64,5 @@ namespace ryupy
             cudnnDestroyTensorDescriptor(tensor_desc);
             tensor_desc = nullptr;
         }
-        // Don't need to explicitly delete grad since it's a shared_ptr
     }
 }

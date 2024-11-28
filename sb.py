@@ -1,13 +1,15 @@
 import ryupy as rp
 
-bank = rp.nn.LayerBank()
-bank.layer1 = rp.nn.Linear(3, 5, rp.nn.InitType.KAIMING_NORMAL)
+ten1 = rp.rand([2, 2], grad=True)
+ten2 = rp.rand([2, 2])
 
-def forward(x):
-    x = bank.layer1(x)
-    return x
+out = ten1 @ ten2
 
-model = rp.nn.Net(bank, forward)
+target = rp.ones([2, 2])
 
-tensor = rp.rand([1, 3])
-out = model(tensor)
+print(out)
+print(target)
+
+loss = rp.nn.loss.mse(out, target)
+
+print(loss)

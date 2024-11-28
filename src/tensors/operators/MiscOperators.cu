@@ -43,7 +43,7 @@ namespace ryupy
             }
 
             std::vector<int> result_shape = {other.shape[1]};
-            auto result = std::make_shared<Tensor>(other.shape[1] * sizeof(float), result_shape);
+            auto result = std::make_shared<Tensor>(result_shape);
 
             if (requires_grad || other.requires_grad)
             {
@@ -76,7 +76,7 @@ namespace ryupy
             }
 
             std::vector<int> result_shape = {shape[0]};
-            auto result = std::make_shared<Tensor>(shape[0] * sizeof(float), result_shape);
+            auto result = std::make_shared<Tensor>(result_shape);
 
             if (requires_grad || other.requires_grad)
             {
@@ -134,7 +134,7 @@ namespace ryupy
             result_shape.push_back(m);
             result_shape.push_back(n);
 
-            auto result = std::make_shared<Tensor>(batchSize * m * n * sizeof(float), result_shape);
+            auto result = std::make_shared<Tensor>(result_shape);
 
             if (requires_grad || other.requires_grad)
             {

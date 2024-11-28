@@ -34,10 +34,14 @@ namespace ryupy
         auto input1 = prev[0];
         auto input2 = prev[1];
 
+        std::cout << "SEDX " << grad->getShape()[0] << std::endl;
+        std::cout << "SEDX " << grad->getShape()[0] << std::endl;
+
         if (input1->requires_grad)
         {
             input1->grad = grad->copy()->matmul(*input2);
         }
+
         if (input2->requires_grad)
         {
             input2->grad = grad->copy()->matmul(*input1);

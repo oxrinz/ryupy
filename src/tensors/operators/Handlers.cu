@@ -4,6 +4,7 @@
 #include <pybind11/stl.h>
 #include <iostream>
 #include <optional>
+#include <numeric>
 
 namespace ryupy
 {
@@ -104,5 +105,26 @@ namespace ryupy
         cudaDeviceSynchronize();
 
         return shared_from_this();
+    }
+
+    float Tensor::handleReduceOperator(KernelEmptyFunc kernel) const
+    {
+        float *d_result;
+        cudaMalloc(&d_result, sizeof(float));
+        cudaMemset(d_result, 0, sizeof(float));
+
+        int threadsPerBlock = 256;
+        int blocksPerGrid = (size / sizeof(float) + threadsPerBlock - 1) / threadsPerBlock;
+
+        kernel<<<blocksPerGrid, threadsPerBlock, threadsPerBlock * sizeof(float)>>>(
+            d_data,
+            d_result,
+            size / sizeof(float));
+
+        float result;
+        cudaMemcpy(&result, d_result, sizeof(float), cudaMemcpyDeviceToHost);
+
+        cudaFree(d_result);
+        return result;
     }
 }

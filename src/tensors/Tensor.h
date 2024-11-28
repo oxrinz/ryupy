@@ -4,6 +4,7 @@
 #include <pybind11/stl.h>
 #include <vector>
 #include <memory>
+#include <optional>
 #include <cudnn.h>
 
 namespace py = pybind11;
@@ -24,7 +25,7 @@ namespace ryupy
         bool requires_grad;
         std::function<void(void)> backward_fn;
         bool is_leaf;
-        void backward();
+        void backward(const Tensor *gradient = nullptr);
 
         // Constructors
         Tensor() = default;
@@ -57,7 +58,7 @@ namespace ryupy
 
         // Python interface shit
         std::shared_ptr<Tensor> parent; // Shit solution but it works, change later maybe
-        int parent_index;              
+        int parent_index;
 
         std::string repr() const;
         const std::vector<int> getShape() const;
@@ -78,6 +79,7 @@ namespace ryupy
         std::shared_ptr<Tensor> handleEmptyOperator(KernelEmptyFunc kernel) const;
         std::shared_ptr<Tensor> handleInPlaceShiftOperator(const int shift, KernelShiftFunc kernel);
         std::shared_ptr<Tensor> handleInPlaceEmptyOperator(KernelEmptyFunc kernel);
+        float handleReduceOperator(KernelEmptyFunc kernel) const;
 
         // Basic arithmetic operators
         std::shared_ptr<Tensor> operator+(Tensor &other);
@@ -138,6 +140,7 @@ namespace ryupy
         // std::shared_ptr<Tensor> cos() const;  // Cosine
         // std::shared_ptr<Tensor> tan() const;  // Tangent
         std::shared_ptr<Tensor> negate();
+        float sum() const;
 
         // Floor, ceil, and rounding
         // std::shared_ptr<Tensor> floor() const;

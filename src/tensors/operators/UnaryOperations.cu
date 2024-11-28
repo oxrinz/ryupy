@@ -3,6 +3,7 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 #include "kernels/Kernels.h"
+#include <numeric>
 
 namespace ryupy
 {
@@ -17,5 +18,10 @@ namespace ryupy
     {
         std::shared_ptr<Tensor> tensor = handleEmptyOperator(logKernel);
         return tensor;
+    }
+    
+    float Tensor::sum() const
+    {
+        return handleReduceOperator(sumReduceKernel);
     }
 }

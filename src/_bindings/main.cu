@@ -7,11 +7,15 @@
 #include "../nn/layers/basic/LinearLayer.h"
 #include "../nn/layerbank/LayerBank.h"
 #include "../nn/net/Net.h"
+#include "../Ryu.h"
+#include "../nn/loss/Loss.h"
 
 namespace py = pybind11;
 
 PYBIND11_MODULE(_ryupy, m)
 {
+     m.def("ryu", &ryupy::print_ryu);
+
      py::class_<ryupy::Tensor, std::shared_ptr<ryupy::Tensor>>(m, "Tensor")
          .def_property_readonly("shape", &ryupy::Tensor::getShape)
          .def_property_readonly("flattenedData", &ryupy::Tensor::getFlattenedData)
@@ -21,7 +25,7 @@ PYBIND11_MODULE(_ryupy, m)
                        { return t.grad; }, [](ryupy::Tensor &t, std::shared_ptr<ryupy::Tensor> new_grad)
                        { t.grad = new_grad; })
          .def_readwrite("requires_grad", &ryupy::Tensor::requires_grad)
-         .def("backward", &ryupy::Tensor::backward)
+         .def("backward", &ryupy::Tensor::backward, py::arg("gradient") = nullptr)
 
          .def("copy", &ryupy::Tensor::copy)
 
@@ -134,4 +138,8 @@ PYBIND11_MODULE(_ryupy, m)
      py::class_<ryupy::nn::Net, std::shared_ptr<ryupy::nn::Net>>(nn, "Net")
          .def(py::init(&ryupy::nn::Net::create))
          .def("__call__", &ryupy::nn::Net::forward);
+
+     auto loss = nn.def_submodule("loss");
+
+     loss.def("mse", &ryupy::nn::loss::mse_loss);
 }

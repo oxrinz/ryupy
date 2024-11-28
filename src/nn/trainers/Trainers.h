@@ -6,7 +6,11 @@ namespace ryupy
     {
         namespace trainers
         {
-            
+            class Trainer
+            {
+            public:
+                
+            };
         }
     }
 }
