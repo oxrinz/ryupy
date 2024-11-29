@@ -1,4 +1,6 @@
-#pragma once
+#include "Optim.h"
+#include "../net/Net.h"
+#include <iostream>
 
 namespace ryupy
 {
@@ -7,52 +9,60 @@ namespace ryupy
         namespace optim
         {
 
-            SGD::SGD(std::shared_ptr<LayerBank> bank,
-                     float lr = 0.01f,
-                     float momentum = 0.0f,
-                     float dampening = 0.0f,
-                     float weight_decay = 0.0f,
-                     bool nesterov = false)
-                : Optimizer(bank, lr),
+            SGD::SGD(std::shared_ptr<Net> net,
+                float lr,
+                float momentum,
+                float dampening,
+                float weight_decay,
+                bool nesterov)
+                : Optimizer(net->m_layer_bank, lr),
                   momentum(momentum),
                   dampening(dampening),
                   weight_decay(weight_decay),
-                  nesterov(nesterov) {};
-
-            void step()
+                  nesterov(nesterov)
             {
-                auto parameters = get_parameters();
+            }
+
+            void SGD::step()
+            {
+                std::vector<std::shared_ptr<Tensor>> parameters;
+                for (const auto &layer : layer_bank->layers)
+                {
+                    parameters.push_back(layer.second->weight);
+                }
+
                 for (auto &param : parameters)
                 {
-                    if (!param->grad)
-                        continue;
-
                     auto d_p = param->grad->copy();
 
-                    if (weight_decay != 0)
-                    {
-                        *d_p += (*param * weight_decay);
-                    }
+                    // if (weight_decay != 0)
+                    // {
+                    //     *d_p += (*param * weight_decay);
+                    // }
 
-                    if (momentum != 0)
-                    {
-                        init_state(param);
-                        auto &momentum_buffer = state[param]["momentum_buffer"];
+                    // if (momentum != 0)
+                    // {
+                    //     init_state(param);
+                    //     auto &momentum_buffer = state[param]["momentum_buffer"];
 
-                        *momentum_buffer = (*momentum_buffer * momentum) +
-                                           (*d_p * (1.0f - dampening));
+                    //     *momentum_buffer = (*momentum_buffer * momentum) +
+                    //                        (*d_p * (1.0f - dampening));
 
-                        if (nesterov)
-                        {
-                            *d_p += (*momentum_buffer * momentum);
-                        }
-                        else
-                        {
-                            d_p = momentum_buffer;
-                        }
-                    }
+                    //     if (nesterov)
+                    //     {
+                    //         *d_p += (*momentum_buffer * momentum);
+                    //     }
+                    //     else
+                    //     {
+                    //         d_p = momentum_buffer;
+                    //     }
+                    // }
 
-                    *param -= (*d_p * lr);
+                    auto lr_tensor = Tensor::fill(d_p->shape, lr, false);
+
+                    auto update = (*d_p) * (*lr_tensor);
+
+                    *param -= *update;
                 }
             }
         }

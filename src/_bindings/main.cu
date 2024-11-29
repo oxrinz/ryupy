@@ -9,6 +9,7 @@
 #include "../nn/net/Net.h"
 #include "../Ryu.h"
 #include "../nn/loss/Loss.h"
+#include "../nn/optim/Optim.h"
 
 namespace py = pybind11;
 
@@ -69,6 +70,7 @@ PYBIND11_MODULE(_ryupy, m)
          .def("__ilshift__", &ryupy::Tensor::operator<<=)
          .def("__irshift__", &ryupy::Tensor::operator>>=)
 
+         .def("sum", &ryupy::Tensor::sum)
          .def("__neg__", &ryupy::Tensor::negate)
 
          .def("__matmul__", &ryupy::Tensor::matmul);
@@ -142,4 +144,21 @@ PYBIND11_MODULE(_ryupy, m)
      auto loss = nn.def_submodule("loss");
 
      loss.def("mse", &ryupy::nn::loss::mse_loss);
+
+     auto optim = nn.def_submodule("optim");
+
+     py::class_<ryupy::nn::optim::Optimizer, std::shared_ptr<ryupy::nn::optim::Optimizer>>(optim, "Optimizer")
+         .def(py::init<std::shared_ptr<ryupy::nn::LayerBank>, float>())
+         .def("step", &ryupy::nn::optim::Optimizer::step);
+
+     using SGD = ryupy::nn::optim::SGD;
+     py::class_<SGD, ryupy::nn::optim::Optimizer, std::shared_ptr<SGD>>(optim, "SGD")
+         .def(py::init<std::shared_ptr<ryupy::nn::Net>, float, float, float, float, bool>(),
+              py::arg("layer_bank"),
+              py::arg("lr") = 0.01f,
+              py::arg("momentum") = 0.0f,
+              py::arg("dampening") = 0.0f,
+              py::arg("weight_decay") = 0.0f,
+              py::arg("nesterov") = false)
+         .def("step", &SGD::step);
 }

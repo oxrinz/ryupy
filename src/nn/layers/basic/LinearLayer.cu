@@ -27,13 +27,15 @@ namespace ryupy
                 break;
             }
 
+            weight->requires_grad = true;
+
             std::vector<int> bias_shape = {out_features};
             bias = Tensor::zeros(bias_shape);
         }
 
         std::shared_ptr<Tensor> LinearLayer::forward(Tensor &tensor)
         {
-            return tensor.matmul(*weight);
+            return tensor.matmul(*weight)->operator+(*bias);
         }
 
         std::shared_ptr<LinearLayer> LinearLayer::create(int in_features, int out_features, InitType init_type)

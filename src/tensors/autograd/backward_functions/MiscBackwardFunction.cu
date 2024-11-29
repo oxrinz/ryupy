@@ -34,17 +34,56 @@ namespace ryupy
         auto input1 = prev[0];
         auto input2 = prev[1];
 
-        std::cout << "SEDX " << grad->getShape()[0] << std::endl;
-        std::cout << "SEDX " << grad->getShape()[0] << std::endl;
+        if (!grad)
+        {
+            throw std::runtime_error("Gradient is null for one or more input tensors. Is grad on?");
+        }
 
         if (input1->requires_grad)
         {
-            input1->grad = grad->copy()->matmul(*input2);
+            if (grad->shape.size() == 1 && input2->shape.size() == 1)
+            {
+                auto grad_2d = grad->copy();
+                auto input2_2d = input2->copy();
+                grad_2d->shape = {grad->shape[0], 1};
+                input2_2d->shape = {1, input2->shape[0]};
+                input1->grad = grad_2d->matmul(*input2_2d);
+                input1->grad->shape = input1->shape;
+            }
+            else
+            {
+                if (input2->shape.size() == 1)
+                {
+                    auto grad_2d = grad->copy();
+                    auto input2_2d = input2->copy();
+                    grad_2d->shape = {grad->shape[0], 1};
+                    input2_2d->shape = {input2->shape[0], 1};
+                    auto transposed = input2_2d->transpose();
+                    input1->grad = grad_2d->matmul(*transposed);
+                }
+                else
+                {
+                    auto transposed = input2->transpose();
+                    input1->grad = grad->matmul(*transposed);
+                }
+            }
         }
 
         if (input2->requires_grad)
         {
-            input2->grad = grad->copy()->matmul(*input1);
+            if (grad->shape.size() == 1 && input1->shape.size() == 1)
+            {
+                auto grad_2d = grad->copy();
+                auto input1_2d = input1->copy();
+                grad_2d->shape = {grad->shape[0], 1};
+                input1_2d->shape = {1, input1->shape[0]};
+                input2->grad = grad_2d->matmul(*input1_2d);
+                input2->grad->shape = input2->shape;
+            }
+            else
+            {
+                input2->grad = grad->copy()->matmul(*input1);
+            }
         }
     }
 }

@@ -30,7 +30,6 @@ namespace ryupy
         // Constructors
         Tensor() = default;
         explicit Tensor(std::vector<int> shape);
-        explicit Tensor(int size, std::vector<int> shape);
         virtual ~Tensor();
 
         // Initializers
@@ -48,6 +47,7 @@ namespace ryupy
         static std::shared_ptr<Tensor> kaiming_uniform(const std::vector<int> &shape, bool grad = false);
 
         // Utils
+        std::vector<int> calculate_strides(const std::vector<int> &shape) const;
         static std::pair<int, int> calculate_fans(const std::vector<int> &shape);
         std::shared_ptr<Tensor> copy() const;
 
@@ -124,6 +124,9 @@ namespace ryupy
 
         // Matrix multiplication
         std::shared_ptr<Tensor> matmul(Tensor &other);
+
+        // Transpose
+        std::shared_ptr<Tensor> transpose(const std::vector<int> &dims = {});
 
         // Logical operators (for boolean tensors)
         // std::shared_ptr<Tensor> logical_and(const Tensor &other) const;

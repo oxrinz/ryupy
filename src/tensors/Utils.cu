@@ -53,4 +53,15 @@ namespace ryupy
         return result;
     }
 
+    std::vector<int> Tensor::calculate_strides(const std::vector<int> &shape) const
+    {
+        std::vector<int> strides(shape.size());
+        int stride = 1;
+        for (int i = shape.size() - 1; i >= 0; i--)
+        {
+            strides[i] = stride;
+            stride *= shape[i];
+        }
+        return strides;
+    }
 }

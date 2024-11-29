@@ -163,4 +163,110 @@ namespace ryupy
 
         throw std::invalid_argument("Invalid tensor dimensions for matrix multiplication");
     }
+
+    std::shared_ptr<Tensor> Tensor::transpose(const std::vector<int> &dims)
+    {
+        int ndim = shape.size();
+
+        // If no dimensions specified, reverse all dimensions
+        std::vector<int> perm;
+        if (dims.empty())
+        {
+            perm.resize(ndim);
+            for (int i = 0; i < ndim; i++)
+            {
+                perm[i] = ndim - 1 - i;
+            }
+        }
+        else
+        {
+            // Validate and use specified dimensions
+            if (dims.size() != ndim)
+            {
+                throw std::runtime_error("Number of dimensions in permutation must match tensor dimensions");
+            }
+
+            // Check for valid permutation
+            std::vector<bool> used(ndim, false);
+            for (int dim : dims)
+            {
+                if (dim < 0 || dim >= ndim || used[dim])
+                {
+                    throw std::runtime_error("Invalid permutation dimensions");
+                }
+                used[dim] = true;
+            }
+            perm = dims;
+        }
+
+        // Calculate new shape
+        std::vector<int> new_shape(ndim);
+        for (int i = 0; i < ndim; i++)
+        {
+            new_shape[i] = shape[perm[i]];
+        }
+
+        // Create result tensor
+        auto result = std::make_shared<Tensor>(new_shape);
+
+        // Calculate strides for input and output
+        auto input_strides = calculate_strides(shape);
+        auto output_strides = calculate_strides(new_shape);
+
+        // Allocate and copy arrays to device
+        int *d_input_shape, *d_input_strides, *d_output_strides, *d_perm;
+        cudaMalloc(&d_input_shape, ndim * sizeof(int));
+        cudaMalloc(&d_input_strides, ndim * sizeof(int));
+        cudaMalloc(&d_output_strides, ndim * sizeof(int));
+        cudaMalloc(&d_perm, ndim * sizeof(int));
+
+        cudaMemcpy(d_input_shape, shape.data(), ndim * sizeof(int), cudaMemcpyHostToDevice);
+        cudaMemcpy(d_input_strides, input_strides.data(), ndim * sizeof(int), cudaMemcpyHostToDevice);
+        cudaMemcpy(d_output_strides, output_strides.data(), ndim * sizeof(int), cudaMemcpyHostToDevice);
+        cudaMemcpy(d_perm, perm.data(), ndim * sizeof(int), cudaMemcpyHostToDevice);
+
+        // Launch kernel
+        int block_size = 256;
+        int num_blocks = (size + block_size - 1) / block_size;
+
+        transpose_kernel<<<num_blocks, block_size>>>(
+            d_data, result->d_data,
+            d_input_shape, d_input_strides,
+            d_output_strides, d_perm,
+            ndim, size);
+
+        // Clean up
+        cudaFree(d_input_shape);
+        cudaFree(d_input_strides);
+        cudaFree(d_output_strides);
+        cudaFree(d_perm);
+
+        // Set up autograd
+        if (requires_grad)
+        {
+            result->requires_grad = true;
+            result->is_leaf = false;
+            result->prev = {shared_from_this()};
+            result->backward_fn = [result, perm]()
+            {
+                // The gradient of transpose is just another transpose with inverse permutation
+                auto input = result->prev[0];
+                if (!result->grad)
+                {
+                    throw std::runtime_error("Gradient is null. Is grad on?");
+                }
+
+                // Calculate inverse permutation
+                std::vector<int> inverse_perm(perm.size());
+                for (size_t i = 0; i < perm.size(); i++)
+                {
+                    inverse_perm[perm[i]] = i;
+                }
+
+                input->grad = result->grad->transpose(inverse_perm);
+            };
+        }
+
+        return result;
+    }
 }

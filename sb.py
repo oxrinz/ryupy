@@ -1,15 +1,31 @@
 import ryupy as rp
 
-ten1 = rp.rand([2, 2], grad=True)
-ten2 = rp.rand([2, 2])
+bank = rp.nn.LayerBank()
+bank.layer1 = rp.nn.Linear(2, 2, rp.nn.InitType.KAIMING_NORMAL)
 
-out = ten1 @ ten2
 
-target = rp.ones([2, 2])
+def forward(x):
+    return bank.layer1(x)
 
-print(out)
-print(target)
 
-loss = rp.nn.loss.mse(out, target)
+model = rp.nn.Net(bank, forward)
 
-print(loss)
+input = rp.fill([2], 2.0)
+target = rp.rand([2])
+
+out = model(input)
+
+loss = [1111]
+
+optim = rp.nn.optim.SGD(model)
+
+while loss[0] > 0.01:
+    loss = rp.nn.loss.mse(out, target)
+    loss.backward()
+
+    optim.step()
+
+    out = model(input)
+
+    print(out)
+    print(f"loss: {loss[0]}")

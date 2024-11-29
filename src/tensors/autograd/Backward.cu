@@ -36,6 +36,7 @@ namespace ryupy
         }
 
         backward_fn();
+
         for (const auto &prev : prev)
         {
             if (prev->is_leaf == false)

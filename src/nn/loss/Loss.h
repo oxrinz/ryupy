@@ -8,7 +8,7 @@ namespace ryupy
     {
         namespace loss
         {
-            float mse_loss(Tensor &predictions, Tensor &targets);
+            std::shared_ptr<Tensor> mse_loss(Tensor &predictions, Tensor &targets);
         }
     }
 }

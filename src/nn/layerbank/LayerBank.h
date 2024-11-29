@@ -11,11 +11,10 @@ namespace ryupy
     {
         class LayerBank
         {
-        private:
-            std::unordered_map<std::string, std::shared_ptr<Layer>> layers;
-
         public:
             LayerBank() = default;
+
+            std::unordered_map<std::string, std::shared_ptr<Layer>> layers;
 
             void setLayer(const std::string &name, std::shared_ptr<Layer> layer);
 

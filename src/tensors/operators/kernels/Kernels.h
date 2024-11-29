@@ -27,4 +27,9 @@ namespace ryupy
     __global__ void logKernel(const float *input, float *output, int size);
     __global__ void negateKernel(const float *input, float *output, int size);
     __global__ void sumReduceKernel(const float *input, float *output, int size);
+
+    __global__ void transpose_kernel(const float *input, float *output,
+                                     const int *input_shape, const int *input_strides,
+                                     const int *output_strides, const int *perm,
+                                     int ndim, int size);
 }
