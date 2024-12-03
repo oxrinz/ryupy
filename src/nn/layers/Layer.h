@@ -12,6 +12,7 @@ namespace ryupy
             virtual ~Layer() = default;
 
             std::shared_ptr<Tensor> weight;
+            std::shared_ptr<Tensor> bias;
 
             virtual std::shared_ptr<Tensor> forward(Tensor &tensor) = 0;
         };

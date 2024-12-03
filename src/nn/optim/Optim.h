@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../layerbank/LayerBank.h"
-#include "../net/Net.h"
+#include "../layerbank/LayerBank.h"
 
 namespace ryupy
 {
@@ -37,7 +37,7 @@ namespace ryupy
                 bool nesterov;
 
             public:
-                SGD(std::shared_ptr<Net> net, float lr = 0.01, float momentum = 0.0, float dampening = 0.0, float weight_decay = 0.0, bool nesterov = false);
+                SGD(std::shared_ptr<LayerBank> bank, float lr = 0.01, float momentum = 0.0, float dampening = 0.0, float weight_decay = 0.0, bool nesterov = false);
 
                 void step() override;
             };

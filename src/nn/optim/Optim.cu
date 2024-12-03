@@ -9,13 +9,13 @@ namespace ryupy
         namespace optim
         {
 
-            SGD::SGD(std::shared_ptr<Net> net,
-                float lr,
-                float momentum,
-                float dampening,
-                float weight_decay,
-                bool nesterov)
-                : Optimizer(net->m_layer_bank, lr),
+            SGD::SGD(std::shared_ptr<LayerBank> bank,
+                     float lr,
+                     float momentum,
+                     float dampening,
+                     float weight_decay,
+                     bool nesterov)
+                : Optimizer(bank, lr),
                   momentum(momentum),
                   dampening(dampening),
                   weight_decay(weight_decay),
@@ -29,6 +29,7 @@ namespace ryupy
                 for (const auto &layer : layer_bank->layers)
                 {
                     parameters.push_back(layer.second->weight);
+                    parameters.push_back(layer.second->bias);
                 }
 
                 for (auto &param : parameters)

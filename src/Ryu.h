@@ -60,7 +60,7 @@ namespace ryupy
         const char *RESET = "\033[0m";
 
         SystemInfo sys_info = SystemInfo::get_info();
-        const auto &gpu = sys_info.gpus[0]; // Get first GPU for display
+        const auto &gpu = sys_info.gpus[0]; 
 
         std::cout << RED << R"(                                                                                               
                 █                          
@@ -90,5 +90,4 @@ namespace ryupy
             ████████████                   
 )" << RESET << std::endl;
     }
-
-} // namespace ryupy
+}
