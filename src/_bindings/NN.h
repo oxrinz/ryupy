@@ -10,6 +10,7 @@
 #include "../nn/loss/Loss.h"
 #include "../nn/optim/Optim.h"
 #include "../data/Dataset.h"
+#include "../nn/layers/ActivationLayers.h"
 
 #include "Tensor.h"
 #include "Layers.h"
@@ -26,6 +27,16 @@ inline void bind_nn(py::module &m)
     auto loss = nn.def_submodule("loss");
 
     loss.def("mse", &ryupy::nn::loss::mse_loss);
+
+    nn.def("relu", &ryupy::nn::relu, py::arg("input"));
+
+    nn.def("sigmoid", &ryupy::nn::sigmoid, py::arg("input"));
+
+    nn.def("tanh", &ryupy::nn::tanh, py::arg("input"));
+
+    nn.def("leaky_relu", &ryupy::nn::leaky_relu,
+           py::arg("input"),
+           py::arg("negative_slope") = 0.01f);
 
     bind_optimizers(nn);
 }

@@ -1,5 +1,4 @@
 #include "Optim.h"
-#include "../net/Net.h"
 #include <iostream>
 
 namespace ryupy
