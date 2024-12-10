@@ -19,8 +19,9 @@ namespace ryupy
                 float scale = 1.0f / (predictions.size / sizeof(float));
                 auto diff = predictions - targets;
                 auto squared = (*diff) * (*diff);
-                float sum = squared->sum();
-                auto result = Tensor::fill({1}, sum * scale);
+                auto sum = squared->sum(std::nullopt, false);
+                auto scale_tensor = Tensor::fill(std::vector<int>{1}, scale);
+                auto result = sum->operator*(*scale_tensor);
 
                 if (predictions.requires_grad)
                 {

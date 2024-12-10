@@ -9,7 +9,7 @@ namespace ryupy
     {
         LinearLayer::LinearLayer(int in_features, int out_features, InitType init_type)
         {
-            std::vector<int> weight_shape = {in_features, out_features};
+            std::vector<int> weight_shape = {out_features, in_features};
 
             switch (init_type)
             {
@@ -37,7 +37,7 @@ namespace ryupy
 
         std::shared_ptr<Tensor> LinearLayer::forward(Tensor &tensor)
         {
-            return tensor.matmul(*weight)->operator+(*bias);
+            return tensor.matmul(*weight->transpose(0, 1))->operator+(*bias);
         }
 
         std::shared_ptr<LinearLayer> LinearLayer::create(int in_features, int out_features, InitType init_type)

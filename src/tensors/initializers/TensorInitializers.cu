@@ -46,7 +46,7 @@ namespace ryupy
 
     std::shared_ptr<Tensor> Tensor::arange(float start, float stop, float step, bool grad)
     {
-        int size = static_cast<int>((stop - start) / step);
+        int size = static_cast<int>(std::ceil(std::abs((stop - start) / step)));
         std::vector<int> shape = {size};
 
         std::shared_ptr<Tensor> tensor = std::make_shared<Tensor>(shape);

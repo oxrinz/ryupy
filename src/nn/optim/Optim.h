@@ -24,7 +24,6 @@ namespace ryupy
 
                 virtual void step()
                 {
-                    // Default implementation does nothing
                 }
             };
 

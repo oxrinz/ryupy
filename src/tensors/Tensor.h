@@ -16,6 +16,7 @@ namespace ryupy
     public:
         std::vector<int> shape;
         float *d_data;
+        // IMPORTANT!! Currently the size is BYTES, not the amount of elements. Change this later
         int size;
         cudnnTensorDescriptor_t tensor_desc;
 
@@ -55,6 +56,13 @@ namespace ryupy
         std::vector<int> inferShape(const py::object &obj);
         std::vector<float> flattenPythonData(const py::object &obj);
         py::object reshapeData(const std::vector<float> &data, const std::vector<int> &shape) const;
+        std::shared_ptr<Tensor> reshape(const std::vector<int> &new_shape);
+        std::shared_ptr<Tensor> transpose(int dim0, int dim1);
+
+        // Broadcasting functionality
+        bool is_broadcastable_to(const std::vector<int> &target_shape) const;
+        std::shared_ptr<Tensor> broadcast_to(const std::vector<int> &target_shape) const;
+        static int calculateBroadcastOffset(int flat_idx, const std::vector<int> &dims, const std::vector<int> &broadcast_shape);
 
         // Python interface shit
         std::shared_ptr<Tensor> parent; // Shit solution but it works, change later maybe
@@ -125,9 +133,6 @@ namespace ryupy
         // Matrix multiplication
         std::shared_ptr<Tensor> matmul(Tensor &other);
 
-        // Transpose
-        std::shared_ptr<Tensor> transpose(const std::vector<int> &dims = {});
-
         // Logical operators (for boolean tensors)
         // std::shared_ptr<Tensor> logical_and(const Tensor &other) const;
         // std::shared_ptr<Tensor> logical_or(const Tensor &other) const;
@@ -143,7 +148,7 @@ namespace ryupy
         // std::shared_ptr<Tensor> cos() const;  // Cosine
         // std::shared_ptr<Tensor> tan() const;  // Tangent
         std::shared_ptr<Tensor> negate();
-        float sum() const;
+        std::shared_ptr<ryupy::Tensor> sum(const std::optional<int> &dim = std::nullopt, bool keepdim = false);
 
         // Floor, ceil, and rounding
         // std::shared_ptr<Tensor> floor() const;

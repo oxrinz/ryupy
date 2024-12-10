@@ -2,6 +2,7 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 #include <iostream>
+#include "operators/kernels/Kernels.h"
 
 namespace ryupy
 {
@@ -25,6 +26,21 @@ namespace ryupy
         }
 
         return {fan_in, fan_out};
+    }
+
+    std::vector<int> Tensor::calculate_strides(const std::vector<int> &shape) const
+    {
+        std::vector<int> strides(shape.size());
+        int stride = 1;
+
+        // Calculate strides in reverse order (row-major format)
+        for (int i = shape.size() - 1; i >= 0; i--)
+        {
+            strides[i] = stride;
+            stride *= shape[i];
+        }
+
+        return strides;
     }
 
     std::shared_ptr<Tensor> Tensor::copy() const
@@ -51,17 +67,5 @@ namespace ryupy
                                    strideA.data());
 
         return result;
-    }
-
-    std::vector<int> Tensor::calculate_strides(const std::vector<int> &shape) const
-    {
-        std::vector<int> strides(shape.size());
-        int stride = 1;
-        for (int i = shape.size() - 1; i >= 0; i--)
-        {
-            strides[i] = stride;
-            stride *= shape[i];
-        }
-        return strides;
     }
 }

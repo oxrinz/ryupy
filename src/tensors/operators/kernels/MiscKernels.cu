@@ -12,30 +12,33 @@ namespace ryupy
         }
     }
 
-    __global__ void transpose_kernel(const float *input, float *output,
-                                     const int *input_shape, const int *input_strides,
-                                     const int *output_strides, const int *perm,
-                                     int ndim, int size)
+
+    __global__ void permuteDimsKernel(const float *in, float *out, int *in_shape, int *out_shape, int *perm, int ndim, int total)
     {
         int idx = blockIdx.x * blockDim.x + threadIdx.x;
-        if (idx >= size)
-            return;
-
-        int coords[32];
-        int in_idx = idx;
-        int out_idx = 0;
-
-        for (int i = 0; i < ndim; i++)
+        if (idx < total)
         {
-            coords[i] = in_idx / input_strides[i];
-            in_idx = in_idx % input_strides[i];
+            int coords_in[32];
+            int tmp = idx;
+            for (int i = ndim - 1; i >= 0; i--)
+            {
+                int s = out_shape[i];
+                coords_in[i] = tmp % s;
+                tmp /= s;
+            }
+            int coords_orig[32];
+            for (int i = 0; i < ndim; i++)
+            {
+                coords_orig[perm[i]] = coords_in[i];
+            }
+            int stride = 1;
+            int in_idx = 0;
+            for (int i = ndim - 1; i >= 0; i--)
+            {
+                in_idx += coords_orig[i] * stride;
+                stride *= in_shape[i];
+            }
+            out[idx] = in[in_idx];
         }
-
-        for (int i = 0; i < ndim; i++)
-        {
-            out_idx += coords[perm[i]] * output_strides[i];
-        }
-
-        output[out_idx] = input[idx];
     }
 }

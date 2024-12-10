@@ -8,15 +8,15 @@
 #include "../nn/layerbank/LayerBank.h"
 #include "../Ryu.h"
 #include "../nn/loss/Loss.h"
-#include "../nn/optim/Optim.h"
-#include "../data/Dataset.h" 
- 
+#include "../nn/optim/Optim.h" 
+#include "../data/Dataset.h"
+
 #include "Tensor.h"
 #include "Layers.h" 
-#include "Optimizers.h"
-#include "NN.h" 
+#include "Optimizers.h" 
+#include "NN.h"
 
-namespace py = pybind11; 
+namespace py = pybind11;
 
 PYBIND11_MODULE(_ryupy, m)
 {

@@ -13,7 +13,7 @@ namespace ryupy
         void LayerBank::setLayer(const std::string &name, std::shared_ptr<Layer> layer)
         {
             layers[name] = layer;
-        }
+        } 
 
         std::shared_ptr<Layer> LayerBank::getLayer(const std::string &name)
         {

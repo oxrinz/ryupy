@@ -35,33 +35,8 @@ namespace ryupy
                 {
                     auto d_p = param->grad->copy();
 
-                    // if (weight_decay != 0)
-                    // {
-                    //     *d_p += (*param * weight_decay);
-                    // }
-
-                    // if (momentum != 0)
-                    // {
-                    //     init_state(param);
-                    //     auto &momentum_buffer = state[param]["momentum_buffer"];
-
-                    //     *momentum_buffer = (*momentum_buffer * momentum) +
-                    //                        (*d_p * (1.0f - dampening));
-
-                    //     if (nesterov)
-                    //     {
-                    //         *d_p += (*momentum_buffer * momentum);
-                    //     }
-                    //     else
-                    //     {
-                    //         d_p = momentum_buffer;
-                    //     }
-                    // }
-
                     auto lr_tensor = Tensor::fill(d_p->shape, lr, false);
-
                     auto update = (*d_p) * (*lr_tensor);
-
                     *param -= *update;
                 }
             }

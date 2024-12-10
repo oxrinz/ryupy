@@ -28,5 +28,6 @@ inline void bind_layers(py::module &nn)
     py::class_<ryupy::nn::LayerBank, std::shared_ptr<ryupy::nn::LayerBank>>(nn, "LayerBank")
         .def(py::init(&ryupy::nn::LayerBank::create))
         .def("__setattr__", &ryupy::nn::LayerBank::setLayer)
-        .def("__getattr__", &ryupy::nn::LayerBank::getLayer);
+        .def("__getattr__", &ryupy::nn::LayerBank::getLayer)
+        .def("zero_grad", &ryupy::nn::LayerBank::zero_grad);
 }

@@ -12,7 +12,14 @@ namespace ryupy
     {
         if (shape != other.shape)
         {
-            throw std::invalid_argument("Tensors must be same shape");
+            std::cerr << "Shape mismatch: ";
+            for (auto s : shape)
+                std::cerr << s << " ";
+            std::cerr << " vs ";
+            for (auto s : other.shape)
+                std::cerr << s << " ";
+            std::cerr << std::endl;
+            throw std::invalid_argument("Shape mismatch in Tensor addition.");
         }
 
         auto result = std::make_shared<Tensor>(shape);

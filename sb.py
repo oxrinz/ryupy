@@ -4,34 +4,35 @@ bank = rp.nn.LayerBank()
 bank.layer1 = rp.nn.Linear(2, 5, rp.nn.InitType.KAIMING_NORMAL)
 bank.layer2 = rp.nn.Linear(5, 3, rp.nn.InitType.KAIMING_NORMAL)
 
+def forward(x):
 
-def forward(inputs):
-    x = bank.layer1(inputs["sex"])
-    print(x)
-    x = rp.nn.relu(x)
-    print(x)
+    x = bank.layer1(x)
+
     x = bank.layer2(x)
-    print(x)
-    x = rp.nn.relu(x)
-    print(x)
-    return {"sex": x}
+
+    return x
 
 
-input = {"sex": rp.fill([2], 2.0)}
-target = rp.fill([3], 111.0)
-
-loss = [1111]
 optim = rp.nn.optim.SGD(bank)
 
-steps_taken = 0
+input = rp.arange(0, 2)
+target = rp.fill([3], 0)
 
-for i in range(111):
+
+loss = [11111]
+optim = rp.nn.optim.SGD(bank)
+
+first = True
+
+while loss[0] > 0.01:    
     out = forward(input)
-
-    loss = rp.nn.loss.mse(out["sex"], target)
+    
+    loss = rp.nn.loss.mse(out, target)
 
     loss.backward()
-
+    
     optim.step()
-
-    steps_taken += 1
+    
+    bank.zero_grad()
+    
+    print(loss)

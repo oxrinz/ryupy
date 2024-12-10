@@ -26,10 +26,13 @@ namespace ryupy
 
     __global__ void logKernel(const float *input, float *output, int size);
     __global__ void negateKernel(const float *input, float *output, int size);
-    __global__ void sumReduceKernel(const float *input, float *output, int size);
+    __global__ void sumKernel(const float *input, float *output, int size);
+    __global__ void sumDimKernel(const float *input, float *output,
+                                 const int *input_strides, const int *output_shape,
+                                 const int *input_shape,
+                                 int reduce_dim, int reduce_size, int output_size,
+                                 int num_dims);
 
-    __global__ void transpose_kernel(const float *input, float *output,
-                                     const int *input_shape, const int *input_strides,
-                                     const int *output_strides, const int *perm,
-                                     int ndim, int size);
+    __global__ void permuteDimsKernel(const float *in, float *out, int *in_shape, int *out_shape, int *perm, int ndim, int total);
+
 }
