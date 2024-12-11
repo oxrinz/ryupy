@@ -129,8 +129,6 @@ namespace ryupy
                          result->d_data + result_offset, CUDA_R_32F, n,
                          CUDA_R_32F,
                          CUBLAS_GEMM_DEFAULT);
-
-            // cudaDeviceSynchronize();
         }
 
         if (result->requires_grad)
