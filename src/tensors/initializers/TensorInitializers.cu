@@ -98,14 +98,14 @@ namespace ryupy
         curandGenerator_t gen;
         curandCreateGenerator(&gen, CURAND_RNG_PSEUDO_DEFAULT);
         curandSetPseudoRandomGeneratorSeed(gen, seed);
-        curandGenerateUniform(gen, tensor->d_data, tensor->size);
+        curandGenerateUniform(gen, tensor->d_data, tensor->size / sizeof(float));
 
         if (low != 0.0f || high != 1.0f)
         {
             float scale = high - low;
             int blockSize = 256;
-            int numBlocks = (tensor->size + blockSize - 1) / blockSize;
-            scaleKernel<<<numBlocks, blockSize>>>(tensor->d_data, low, scale, tensor->size);
+            int numBlocks = (tensor->size / sizeof(float) + blockSize - 1) / blockSize;
+            scaleKernel<<<numBlocks, blockSize>>>(tensor->d_data, low, scale, tensor->size / sizeof(float));
         }
         curandDestroyGenerator(gen);
         return tensor;

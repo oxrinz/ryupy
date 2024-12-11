@@ -119,14 +119,16 @@ namespace ryupy
             int offset2 = calculateBroadcastOffset(batch, batch_dims2, broadcast_shape) * k * n;
             int result_offset = batch * m * n;
 
-            cublasSgemm(CUDAContext::getInstance().getCublasHandle(),
-                        CUBLAS_OP_N, CUBLAS_OP_N,
-                        n, m, k,
-                        &alpha,
-                        other.d_data + offset2, n,
-                        d_data + offset1, k,
-                        &beta,
-                        result->d_data + result_offset, n);
+            cublasGemmEx(CUDAContext::getInstance().getCublasHandle(),
+                         CUBLAS_OP_N, CUBLAS_OP_N,
+                         n, m, k,
+                         &alpha,
+                         other.d_data + offset2, CUDA_R_32F, n,
+                         d_data + offset1, CUDA_R_32F, k,
+                         &beta,
+                         result->d_data + result_offset, CUDA_R_32F, n,
+                         CUDA_R_32F,
+                         CUBLAS_GEMM_DEFAULT);
 
             // cudaDeviceSynchronize();
         }
